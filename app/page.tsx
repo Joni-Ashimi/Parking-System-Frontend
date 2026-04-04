@@ -5,6 +5,7 @@ import Hero from "@/components/sections/Hero";
 import FeaturesSection from "@/components/sections/FeaturesSection";
 import StepsSection from "@/components/sections/StepsSection";
 import VehiclesSection from "@/components/sections/VehiclesSection";
+import Reviews from "@/components/sections/Reviews";
 
 export default function Home() {
     return (
@@ -41,12 +42,13 @@ export default function Home() {
             <FeaturesSection/>
             <VehiclesSection />
             <StepsSection/>
+            <Reviews/>
 
             <section className="py-20 relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20 blur-3xl"></div>
                 <div className="max-w-4xl mx-auto px-6 text-center relative">
                     <div className="animate-fade-in-up">
-                        <h2 className="text-3xl lg:text-4xl font-bold mb-4 bg-gradient-to-r from-gray-100 to-gray-300 bg-clip-text text-transparent">
+                        <h2 className="text-3xl lg:text-4xl font-bold mb-4 pb-2 bg-gradient-to-r from-white to-gray-100 bg-clip-text text-transparent">
                             Ready to simplify parking?
                         </h2>
                         <p className="text-gray-400 mb-8">
