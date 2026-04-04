@@ -1,4 +1,3 @@
-// app/page.tsx
 import Link from "next/link";
 import {ParkingCircle, Zap,} from "lucide-react";
 import Hero from "@/components/sections/Hero";
@@ -22,7 +21,7 @@ export default function Home() {
 
                     <div className="flex gap-4 items-center">
                         <Link
-                            href="/login"
+                            href="/admin/dashboard"
                             className="text-gray-300 hover:text-white transition-all duration-300 hover:scale-105"
                         >
                             Login
