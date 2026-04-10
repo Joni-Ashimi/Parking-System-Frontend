@@ -2,7 +2,7 @@ import Step from "@/components/UI/Step";
 
 export default function StepsSection() {
     return (
-        <section className="py-20">
+        <section className="py-15">
             <div className="max-w-5xl mx-auto px-6 text-center">
 
                 <div className="animate-fade-in-up">
