@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import {useState} from "react";
 import NavItem from "@/components/NavItem";
-import { Activity, DollarSign, Menu, ParkingSquare, Users } from "lucide-react";
+import {Activity, DollarSign, Menu, ParkingSquare, Radio, Users, Map} from "lucide-react";
 
 export default function AdminSidebar() {
     const [isOpen, setIsOpen] = useState(true);
@@ -16,7 +16,7 @@ export default function AdminSidebar() {
             <div className="p-4">
                 <div className="flex items-center justify-between mb-8">
                     <div className="flex items-center overflow-hidden">
-                        <ParkingSquare className="w-6 h-6 text-blue-600 flex-shrink-0" />
+                        <ParkingSquare className="w-6 h-6 text-blue-600 flex-shrink-0"/>
 
                         <span
                             className={`ml-2 font-semibold text-gray-800 whitespace-nowrap overflow-hidden transition-all duration-300 ${
@@ -41,10 +41,13 @@ export default function AdminSidebar() {
                 </div>
 
                 <nav className="space-y-1">
-                    <NavItem icon={<Activity size={18} />} label="Dashboard" href="/admin/dashboard" isOpen={isOpen} />
-                    <NavItem icon={<Users size={18} />} label="Users" href="/admin/users" isOpen={isOpen} />
-                    <NavItem icon={<ParkingSquare size={18} />} label="Parking Spots" href="/admin/parking" isOpen={isOpen} />
-                    <NavItem icon={<DollarSign size={18} />} label="Pricing" href="/admin/pricing" isOpen={isOpen} />
+                    <NavItem icon={<Activity size={18}/>} label="Dashboard" href="/admin/dashboard" isOpen={isOpen}/>
+                    <NavItem icon={<Users size={18}/>} label="Users" href="/admin/users" isOpen={isOpen}/>
+                    <NavItem icon={<ParkingSquare size={18}/>} label="Parking Spots" href="/admin/parkingSpots"
+                             isOpen={isOpen}/>
+                    <NavItem icon={<DollarSign size={18}/>} label="Pricing" href="/admin/pricing" isOpen={isOpen}/>
+                    <NavItem icon={<Radio size={18}/>} label="Live Sessions" href="/admin/sessions" isOpen={isOpen}/>
+                    <NavItem icon={<Map size={18}/>} label="Map" href="/admin/map" isOpen={isOpen}/>
                 </nav>
             </div>
         </div>
