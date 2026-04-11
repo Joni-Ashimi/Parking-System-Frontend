@@ -36,7 +36,6 @@ export default function NavItem({ icon, label, href, isOpen }: NavItemProps) {
                 </span>
             </button>
 
-            {/* Tooltip when collapsed */}
             {!isOpen && (
                 <span className="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 text-xs bg-gray-800 text-white rounded opacity-0 group-hover:opacity-100 transition pointer-events-none whitespace-nowrap">
                     {label}

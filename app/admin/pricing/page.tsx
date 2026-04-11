@@ -51,9 +51,7 @@ export default function PricingPage() {
     return (
         <div className="min-h-screen bg-gray-50">
             <AdminSidebar />
-            {/* Main Content */}
             <div className="ml-64">
-                {/* Header */}
                 <header className="bg-white border-b border-gray-200 px-8 py-4">
                     <div className="flex justify-between items-center">
                         <h1 className="text-2xl font-semibold text-gray-800">
@@ -68,9 +66,7 @@ export default function PricingPage() {
                     </div>
                 </header>
 
-                {/* Content */}
                 <div className="p-8">
-                    {/* Header Stats */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                         <PricingStatCard
                             title="Average Hourly Rate"
@@ -92,11 +88,9 @@ export default function PricingPage() {
                         />
                     </div>
 
-                    {/* Pricing Cards */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
                         {prices.map((price) => (
                             <div key={price.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow">
-                                {/* Header */}
                                 <div className={`p-6 ${
                                     price.id === "car" ? "bg-gradient-to-r from-blue-50 to-blue-100" : "bg-gray-50"
                                 }`}>
@@ -116,9 +110,7 @@ export default function PricingPage() {
                                     <p className="text-sm text-gray-500">{price.size} • {price.spots} spots</p>
                                 </div>
 
-                                {/* Pricing Details */}
                                 <div className="p-6 space-y-4">
-                                    {/* Hourly Rate */}
                                     <div className="flex justify-between items-center py-2 border-b border-gray-100">
                                         <span className="text-gray-600">Hourly Rate</span>
                                         {editingId === price.id ? (
@@ -140,7 +132,6 @@ export default function PricingPage() {
                                         )}
                                     </div>
 
-                                    {/* Daily Rate */}
                                     <div className="flex justify-between items-center py-2 border-b border-gray-100">
                                         <span className="text-gray-600">Daily Rate</span>
                                         {editingId === price.id ? (
@@ -162,14 +153,12 @@ export default function PricingPage() {
                                         )}
                                     </div>
 
-                                    {/* Savings Badge */}
                                     <div className="bg-green-50 rounded-lg p-3">
                                         <p className="text-xs text-green-700">
                                             Save ${(price.hourlyRate * 24) - price.dailyRate} with daily rate!
                                         </p>
                                     </div>
 
-                                    {/* Action Buttons */}
                                     <div className="flex gap-2 pt-2">
                                         {editingId === price.id ? (
                                             <>
@@ -203,7 +192,6 @@ export default function PricingPage() {
                         ))}
                     </div>
 
-                    {/* Special Offers Section */}
                     <div className="bg-white rounded-xl border border-gray-200 p-6 mb-8">
                         <div className="flex items-center justify-between mb-4">
                             <h3 className="font-semibold text-gray-800">Special Offers</h3>
@@ -241,7 +229,6 @@ export default function PricingPage() {
                         </div>
                     </div>
 
-                    {/* Pricing Notes */}
                     <div className="bg-blue-50 rounded-xl p-4 flex items-start gap-3">
                         <AlertCircle size={18} className="text-blue-600 mt-0.5" />
                         <div>
@@ -258,7 +245,6 @@ export default function PricingPage() {
 }
 
 
-// Pricing Stat Card Component
 function PricingStatCard({ title, value, change, trend }: any) {
     return (
         <div className="bg-white rounded-xl border border-gray-200 p-6">
