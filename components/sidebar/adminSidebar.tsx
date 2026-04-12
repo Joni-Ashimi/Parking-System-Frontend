@@ -2,7 +2,7 @@
 
 import {useState} from "react";
 import NavItem from "@/components/NavItem";
-import {Activity, DollarSign, Menu, ParkingSquare, Radio, Users, Map} from "lucide-react";
+import {Activity, DollarSign, Menu, ParkingSquare, Radio, Users, Map, Ban} from "lucide-react";
 
 export default function AdminSidebar() {
     const [isOpen, setIsOpen] = useState(true);
@@ -48,6 +48,7 @@ export default function AdminSidebar() {
                     <NavItem icon={<DollarSign size={18}/>} label="Pricing" href="/admin/pricing" isOpen={isOpen}/>
                     <NavItem icon={<Radio size={18}/>} label="Live Sessions" href="/admin/sessions" isOpen={isOpen}/>
                     <NavItem icon={<Map size={18}/>} label="Map" href="/admin/map" isOpen={isOpen}/>
+                    <NavItem icon={<Ban size={18}/>} label="Violations" href="/admin/violation" isOpen={isOpen}/>
                 </nav>
             </div>
         </div>
