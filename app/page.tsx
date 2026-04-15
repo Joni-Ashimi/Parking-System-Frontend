@@ -6,6 +6,7 @@ import FeaturesSection from "@/components/sections/FeaturesSection";
 import StepsSection from "@/components/sections/StepsSection";
 import VehiclesSection from "@/components/sections/VehiclesSection";
 
+
 export default function Home() {
     return (
         <div className="min-h-screen overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-gray-900">
@@ -22,7 +23,7 @@ export default function Home() {
 
                     <div className="flex gap-4 items-center">
                         <Link
-                            href="/login"
+                            href="/Login"
                             className="text-gray-300 hover:text-white transition-all duration-300 hover:scale-105"
                         >
                             Login
