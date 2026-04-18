@@ -7,6 +7,7 @@ import VehiclesSection from "@/components/sections/VehiclesSection";
 import Reviews from "@/components/sections/Reviews";
 
 export default function Home() {
+
     return (
         <div className="min-h-screen overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-gray-900">
             <nav className="px-6 py-4 bg-black/40 backdrop-blur-xl border-b border-white/10 sticky top-0 z-50">
@@ -22,7 +23,7 @@ export default function Home() {
 
                     <div className="flex gap-4 items-center">
                         <Link
-                            href="/admin/dashboard"
+                            href="/login"
                             className="text-gray-300 hover:text-white transition-all duration-300 hover:scale-105"
                         >
                             Login
@@ -39,7 +40,7 @@ export default function Home() {
 
             <Hero/>
             <FeaturesSection/>
-            <VehiclesSection />
+            <VehiclesSection/>
             <StepsSection/>
             <Reviews/>
 
