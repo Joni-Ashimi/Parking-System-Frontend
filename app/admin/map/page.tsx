@@ -1,15 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import {
-    Car,
-    Wrench,
-    CheckCircle,
-    XCircle,
-    Users,
-    Clock,
-    Navigation,
-} from "lucide-react";
+import {useState} from "react";
+import {Car, CheckCircle, Clock, Navigation, Users, Wrench, XCircle,} from "lucide-react";
 import AdminSidebar from "@/components/sidebar/adminSidebar";
 
 // Types
@@ -122,7 +114,7 @@ export default function ParkingMapPage() {
         if (confirm("Force vacate this spot? The session will be ended and charged.")) {
             setSpots((prev) =>
                 prev.map((s) =>
-                    s.id === spotId ? { ...s, status: "available", currentSession: undefined } : s
+                    s.id === spotId ? {...s, status: "available", currentSession: undefined} : s
                 )
             );
             setShowSpotDetails(false);
@@ -144,18 +136,17 @@ export default function ParkingMapPage() {
     const getStatusIcon = (status: ParkingSpot["status"]) => {
         switch (status) {
             case "available":
-                return <CheckCircle size={14} className="text-green-600" />;
+                return <CheckCircle size={14} className="text-green-600"/>;
             case "occupied":
-                return <Car size={14} className="text-blue-600" />;
+                return <Car size={14} className="text-blue-600"/>;
             case "maintenance":
-                return <Wrench size={14} className="text-orange-600" />;
+                return <Wrench size={14} className="text-orange-600"/>;
         }
     };
 
     return (
-        <div className="min-h-screen bg-gray-100">
-            <AdminSidebar />
-            <div className="ml-64">
+        <AdminSidebar>
+            <div className="min-h-screen bg-gray-100">
                 <header className="bg-white border-b border-gray-200 px-8 py-4">
                     <div className="flex justify-between items-center flex-wrap gap-4">
                         <div>
@@ -208,7 +199,7 @@ export default function ParkingMapPage() {
                     <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
                         <div className="p-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
                             <h2 className="font-semibold text-gray-800 flex items-center gap-2">
-                                <Navigation size={18} className="text-gray-500" />
+                                <Navigation size={18} className="text-gray-500"/>
                                 Main Parking Level
                             </h2>
                             <p className="text-xs text-gray-500">
@@ -221,7 +212,8 @@ export default function ParkingMapPage() {
                             <div className="max-w-5xl mx-auto">
                                 {/* Entrance / Exit indicator */}
                                 <div className="flex items-center justify-end mb-4">
-                                    <div className="bg-gray-700 text-white px-4 py-1.5 rounded-full text-xs font-medium shadow-sm">
+                                    <div
+                                        className="bg-gray-700 text-white px-4 py-1.5 rounded-full text-xs font-medium shadow-sm">
                                         🚗 ENTRANCE / EXIT →
                                     </div>
                                 </div>
@@ -231,7 +223,8 @@ export default function ParkingMapPage() {
                                     {rows.map((row, rowIndex) => (
                                         <div key={row} className="relative">
                                             {/* Row label */}
-                                            <div className="absolute -left-8 top-1/2 -translate-y-1/2 font-bold text-gray-600 text-sm">
+                                            <div
+                                                className="absolute -left-8 top-1/2 -translate-y-1/2 font-bold text-gray-600 text-sm">
                                                 {row}
                                             </div>
 
@@ -252,30 +245,38 @@ export default function ParkingMapPage() {
                                 `}
                                                             >
                                                                 {/* Parking bay lines */}
-                                                                <div className="absolute inset-0 flex items-center justify-center">
-                                                                    <div className="w-full h-full flex flex-col items-center justify-between p-1">
+                                                                <div
+                                                                    className="absolute inset-0 flex items-center justify-center">
+                                                                    <div
+                                                                        className="w-full h-full flex flex-col items-center justify-between p-1">
                                                                         {/* Spot number at top */}
-                                                                        <span className="text-[10px] font-bold text-gray-700 bg-white/60 px-1 rounded">
+                                                                        <span
+                                                                            className="text-[10px] font-bold text-gray-700 bg-white/60 px-1 rounded">
                                       {spot.spotNumber}
                                     </span>
 
                                                                         {/* Vehicle or status icon */}
-                                                                        <div className="flex-1 flex items-center justify-center">
+                                                                        <div
+                                                                            className="flex-1 flex items-center justify-center">
                                                                             {spot.status === "occupied" ? (
-                                                                                <div className="relative w-full h-full flex items-center justify-center">
+                                                                                <div
+                                                                                    className="relative w-full h-full flex items-center justify-center">
                                                                                     <Car
                                                                                         size={28}
                                                                                         className="text-gray-700 drop-shadow"
                                                                                         strokeWidth={1.5}
                                                                                     />
-                                                                                    <span className="absolute bottom-0 text-[8px] font-medium text-gray-700 bg-white/70 px-1 rounded">
+                                                                                    <span
+                                                                                        className="absolute bottom-0 text-[8px] font-medium text-gray-700 bg-white/70 px-1 rounded">
                                             {spot.currentSession?.vehiclePlate}
                                           </span>
                                                                                 </div>
                                                                             ) : spot.status === "maintenance" ? (
-                                                                                <Wrench size={20} className="text-orange-600" />
+                                                                                <Wrench size={20}
+                                                                                        className="text-orange-600"/>
                                                                             ) : (
-                                                                                <CheckCircle size={16} className="text-green-600 opacity-60" />
+                                                                                <CheckCircle size={16}
+                                                                                             className="text-green-600 opacity-60"/>
                                                                             )}
                                                                         </div>
 
@@ -299,8 +300,10 @@ export default function ParkingMapPage() {
                                             {/* Driving lane between rows (except after last row) */}
                                             {rowIndex < rows.length - 1 && (
                                                 <div className="h-8 flex items-center justify-center my-2">
-                                                    <div className="w-full h-0.5 bg-yellow-400/50 border-t-2 border-dashed border-yellow-600"></div>
-                                                    <span className="absolute text-[10px] text-gray-500 bg-gray-200 px-2">
+                                                    <div
+                                                        className="w-full h-0.5 bg-yellow-400/50 border-t-2 border-dashed border-yellow-600"></div>
+                                                    <span
+                                                        className="absolute text-[10px] text-gray-500 bg-gray-200 px-2">
                             DRIVING LANE
                           </span>
                                                 </div>
@@ -311,7 +314,8 @@ export default function ParkingMapPage() {
 
                                 {/* Legend for orientation */}
                                 <div className="mt-6 flex justify-center">
-                                    <div className="bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 shadow-sm text-xs text-gray-600 flex items-center gap-4">
+                                    <div
+                                        className="bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 shadow-sm text-xs text-gray-600 flex items-center gap-4">
                                         <span>← West</span>
                                         <span className="font-medium">Aisle</span>
                                         <span>East →</span>
@@ -321,32 +325,31 @@ export default function ParkingMapPage() {
                         </div>
                     </div>
                 </div>
-            </div>
 
-            {/* Spot Details Modal (unchanged from previous) */}
-            {showSpotDetails && selectedSpot && (
-                <div
-                    className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-                    onClick={() => setShowSpotDetails(false)}
-                >
+                {/* Spot Details Modal (unchanged from previous) */}
+                {showSpotDetails && selectedSpot && (
                     <div
-                        className="bg-white rounded-xl shadow-xl w-full max-w-md"
-                        onClick={(e) => e.stopPropagation()}
+                        className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+                        onClick={() => setShowSpotDetails(false)}
                     >
-                        <div className="flex justify-between items-center p-6 border-b border-gray-200">
-                            <h3 className="text-xl font-semibold text-gray-800">
-                                Spot {selectedSpot.spotNumber}
-                            </h3>
-                            <button
-                                onClick={() => setShowSpotDetails(false)}
-                                className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
-                            >
-                                <XCircle size={20} className="text-gray-500" />
-                            </button>
-                        </div>
+                        <div
+                            className="bg-white rounded-xl shadow-xl w-full max-w-md"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="flex justify-between items-center p-6 border-b border-gray-200">
+                                <h3 className="text-xl font-semibold text-gray-800">
+                                    Spot {selectedSpot.spotNumber}
+                                </h3>
+                                <button
+                                    onClick={() => setShowSpotDetails(false)}
+                                    className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+                                >
+                                    <XCircle size={20} className="text-gray-500"/>
+                                </button>
+                            </div>
 
-                        <div className="p-6 space-y-4">
-                            <div className="flex items-center gap-2">
+                            <div className="p-6 space-y-4">
+                                <div className="flex items-center gap-2">
                 <span
                     className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${
                         selectedSpot.status === "available"
@@ -359,55 +362,58 @@ export default function ParkingMapPage() {
                   {getStatusIcon(selectedSpot.status)}
                     {selectedSpot.status.charAt(0).toUpperCase() + selectedSpot.status.slice(1)}
                 </span>
-                            </div>
+                                </div>
 
-                            {selectedSpot.status === "occupied" && selectedSpot.currentSession && (
-                                <div className="bg-gray-50 rounded-lg p-4 space-y-3">
-                                    <div className="flex items-center gap-2">
-                                        <Users size={18} className="text-gray-500" />
-                                        <span className="text-gray-700">{selectedSpot.currentSession.userName}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <Car size={18} className="text-gray-500" />
-                                        <span className="text-gray-700">{selectedSpot.currentSession.vehiclePlate}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <Clock size={18} className="text-gray-500" />
-                                        <span className="text-gray-700">
+                                {selectedSpot.status === "occupied" && selectedSpot.currentSession && (
+                                    <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+                                        <div className="flex items-center gap-2">
+                                            <Users size={18} className="text-gray-500"/>
+                                            <span
+                                                className="text-gray-700">{selectedSpot.currentSession.userName}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <Car size={18} className="text-gray-500"/>
+                                            <span
+                                                className="text-gray-700">{selectedSpot.currentSession.vehiclePlate}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <Clock size={18} className="text-gray-500"/>
+                                            <span className="text-gray-700">
                       Started: {selectedSpot.currentSession.startTime.toLocaleTimeString()}
                     </span>
+                                        </div>
                                     </div>
-                                </div>
-                            )}
-
-                            <div className="space-y-2 pt-2">
-                                {selectedSpot.status === "occupied" && (
-                                    <button
-                                        onClick={() => handleForceVacate(selectedSpot.id)}
-                                        className="w-full px-4 py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors flex items-center justify-center gap-2"
-                                    >
-                                        <XCircle size={18} />
-                                        Force Vacate & Charge
-                                    </button>
                                 )}
-                                <button
-                                    onClick={() => handleToggleMaintenance(selectedSpot.id)}
-                                    className={`w-full px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2 ${
-                                        selectedSpot.status === "maintenance"
-                                            ? "bg-green-50 text-green-700 hover:bg-green-100"
-                                            : "bg-orange-50 text-orange-700 hover:bg-orange-100"
-                                    }`}
-                                >
-                                    <Wrench size={18} />
-                                    {selectedSpot.status === "maintenance"
-                                        ? "Mark as Available"
-                                        : "Set Maintenance Mode"}
-                                </button>
+
+                                <div className="space-y-2 pt-2">
+                                    {selectedSpot.status === "occupied" && (
+                                        <button
+                                            onClick={() => handleForceVacate(selectedSpot.id)}
+                                            className="w-full px-4 py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors flex items-center justify-center gap-2"
+                                        >
+                                            <XCircle size={18}/>
+                                            Force Vacate & Charge
+                                        </button>
+                                    )}
+                                    <button
+                                        onClick={() => handleToggleMaintenance(selectedSpot.id)}
+                                        className={`w-full px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2 ${
+                                            selectedSpot.status === "maintenance"
+                                                ? "bg-green-50 text-green-700 hover:bg-green-100"
+                                                : "bg-orange-50 text-orange-700 hover:bg-orange-100"
+                                        }`}
+                                    >
+                                        <Wrench size={18}/>
+                                        {selectedSpot.status === "maintenance"
+                                            ? "Mark as Available"
+                                            : "Set Maintenance Mode"}
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )}
+            </div>
+        </AdminSidebar>
     );
 }

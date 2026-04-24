@@ -30,9 +30,9 @@ export default function Header() {
 
     const handleSignUpClick = async (e: React.MouseEvent) => {
         e.preventDefault();
-        if (pathname !== "/signup") {
+        if (pathname !== "/register") {
             dispatch(showLoader("Loading Signup Page..."));
-            router.push("/signup")
+            router.push("/register")
         }
     }
 

@@ -98,25 +98,30 @@ function ActionMenu({
     return (
         <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
 
-            <button className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-indigo-200 text-indigo-600 hover:bg-indigo-50 hover:border-indigo-400 transition-all">
-                <Eye size={13} />
+            <button
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-indigo-200 text-indigo-600 hover:bg-indigo-50 hover:border-indigo-400 transition-all">
+                <Eye size={13}/>
                 View
             </button>
 
             {user.status === "active" ? (
                 <button
-                    onClick={() => { if (confirm("Ban this user?")) onStatusChange(user.id, "banned"); }}
+                    onClick={() => {
+                        if (confirm("Ban this user?")) onStatusChange(user.id, "banned");
+                    }}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-rose-200 text-rose-500 hover:bg-rose-50 hover:border-rose-400 transition-all"
                 >
-                    <UserX size={13} />
+                    <UserX size={13}/>
                     Ban
                 </button>
             ) : (
                 <button
-                    onClick={() => { if (confirm("Activate this user?")) onStatusChange(user.id, "active"); }}
+                    onClick={() => {
+                        if (confirm("Activate this user?")) onStatusChange(user.id, "active");
+                    }}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-emerald-200 text-emerald-600 hover:bg-emerald-50 hover:border-emerald-400 transition-all"
                 >
-                    <UserCheck size={13} />
+                    <UserCheck size={13}/>
                     Activate
                 </button>
             )}
@@ -215,9 +220,8 @@ export default function AdminUsersPage() {
     const activeRate = Math.round((activeCount / MOCK_USERS.length) * 100);
 
     return (
-        <div className="min-h-screen bg-slate-50">
-            <AdminSidebar/>
-            <div className="ml-64">
+        <AdminSidebar>
+            <div className="min-h-screen bg-slate-50">
                 <header className="bg-white border-b border-gray-200 px-8 py-4">
                     <div className="flex justify-between items-center">
                         <div>
@@ -303,6 +307,6 @@ export default function AdminUsersPage() {
                     </div>
                 </div>
             </div>
-        </div>
+        </AdminSidebar>
     );
 }

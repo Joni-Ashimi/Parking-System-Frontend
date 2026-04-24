@@ -1,22 +1,21 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {useEffect, useState} from "react";
 import {
-    Users,
-    Clock,
     AlertTriangle,
     Car,
-    MoreVertical,
     CheckCircle,
-    XCircle,
-    Timer,
-    UserX,
-    Search,
+    Clock,
     Filter,
+    MoreVertical,
+    Search,
+    Timer,
+    Users,
+    UserX,
+    XCircle,
 } from "lucide-react";
 import AdminSidebar from "@/components/sidebar/adminSidebar";
 
-// Types
 interface ParkingSession {
     id: string;
     userId: string;
@@ -26,12 +25,10 @@ interface ParkingSession {
     startTime: Date;
     ratePerHour: number;
     status: "active" | "overdue" | "unpaid";
-    // Derived fields
     duration: number; // in hours (calculated)
     currentCost: number;
 }
 
-// Mock data – in real app this would come from API/WebSocket
 const mockSessions: ParkingSession[] = [
     {
         id: "s1",
@@ -90,7 +87,6 @@ export default function LiveSessionsPage() {
     const [selectedSessions, setSelectedSessions] = useState<string[]>([]);
     const [showActionsMenu, setShowActionsMenu] = useState<string | null>(null);
 
-    // Update durations and costs every second
     useEffect(() => {
         const updateCalculatedFields = () => {
             setSessions((prev) =>
@@ -108,12 +104,11 @@ export default function LiveSessionsPage() {
             );
         };
 
-        updateCalculatedFields(); // immediate update
+        updateCalculatedFields();
         const interval = setInterval(updateCalculatedFields, 1000);
         return () => clearInterval(interval);
     }, []);
 
-    // Filter sessions based on status and search
     const filteredSessions = sessions.filter((session) => {
         const matchesStatus = filterStatus === "all" || session.status === filterStatus;
         const matchesSearch =
@@ -124,13 +119,11 @@ export default function LiveSessionsPage() {
         return matchesStatus && matchesSearch;
     });
 
-    // Stats
     const totalActive = sessions.filter((s) => s.status === "active").length;
     const totalOverdue = sessions.filter((s) => s.status === "overdue").length;
     const totalUnpaid = sessions.filter((s) => s.status === "unpaid").length;
     const totalRevenue = sessions.reduce((sum, s) => sum + s.currentCost, 0);
 
-    // Helper to format duration
     const formatDuration = (hours: number) => {
         const totalMinutes = Math.floor(hours * 60);
         const h = Math.floor(totalMinutes / 60);
@@ -138,7 +131,6 @@ export default function LiveSessionsPage() {
         return `${h}h ${m}m`;
     };
 
-    // Admin actions (mock implementations)
     const handleForceEnd = (sessionId: string) => {
         if (confirm("Force end this session? The user will be charged for current duration.")) {
             setSessions((prev) => prev.filter((s) => s.id !== sessionId));
@@ -149,7 +141,7 @@ export default function LiveSessionsPage() {
 
     const handleMarkAsPaid = (sessionId: string) => {
         setSessions((prev) =>
-            prev.map((s) => (s.id === sessionId ? { ...s, status: "active" } : s))
+            prev.map((s) => (s.id === sessionId ? {...s, status: "active"} : s))
         );
         setShowActionsMenu(null);
     };
@@ -162,9 +154,7 @@ export default function LiveSessionsPage() {
 
     const handleBanUser = (userId: string, userName: string) => {
         if (confirm(`Ban user ${userName}? They will not be able to park again.`)) {
-            // In real app: call API to ban user
             alert(`User ${userName} has been banned.`);
-            // Optionally remove all their sessions
             setSessions((prev) => prev.filter((s) => s.userId !== userId));
         }
         setShowActionsMenu(null);
@@ -174,22 +164,25 @@ export default function LiveSessionsPage() {
         switch (status) {
             case "active":
                 return (
-                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
-            <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                    <span
+                        className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
+            <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"/>
             Active
           </span>
                 );
             case "overdue":
                 return (
-                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800 border border-orange-200">
-            <AlertTriangle size={12} />
+                    <span
+                        className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800 border border-orange-200">
+            <AlertTriangle size={12}/>
             Overdue
           </span>
                 );
             case "unpaid":
                 return (
-                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
-            <XCircle size={12} />
+                    <span
+                        className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
+            <XCircle size={12}/>
             Unpaid
           </span>
                 );
@@ -199,9 +192,8 @@ export default function LiveSessionsPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <AdminSidebar />
-            <div className="ml-64">
+        <AdminSidebar>
+            <div className="min-h-screen bg-gray-50">
                 <header className="bg-white border-b border-gray-200 px-8 py-4">
                     <div className="flex justify-between items-center flex-wrap gap-4">
                         <div>
@@ -212,7 +204,7 @@ export default function LiveSessionsPage() {
                         </div>
                         <div className="flex items-center gap-3">
                             <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 rounded-lg">
-                                <Timer size={16} className="text-blue-600" />
+                                <Timer size={16} className="text-blue-600"/>
                                 <span className="text-sm text-blue-700 font-medium">Live Updates</span>
                             </div>
                         </div>
@@ -220,12 +212,11 @@ export default function LiveSessionsPage() {
                 </header>
 
                 <div className="p-8">
-                    {/* Stats Cards */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                         <div className="bg-white rounded-xl border border-gray-200 p-5">
                             <div className="flex items-center gap-3">
                                 <div className="p-2 bg-blue-50 rounded-lg">
-                                    <Car size={20} className="text-blue-600" />
+                                    <Car size={20} className="text-blue-600"/>
                                 </div>
                                 <div>
                                     <p className="text-sm text-gray-500">Active Sessions</p>
@@ -236,7 +227,7 @@ export default function LiveSessionsPage() {
                         <div className="bg-white rounded-xl border border-gray-200 p-5">
                             <div className="flex items-center gap-3">
                                 <div className="p-2 bg-orange-50 rounded-lg">
-                                    <AlertTriangle size={20} className="text-orange-600" />
+                                    <AlertTriangle size={20} className="text-orange-600"/>
                                 </div>
                                 <div>
                                     <p className="text-sm text-gray-500">Overdue</p>
@@ -247,7 +238,7 @@ export default function LiveSessionsPage() {
                         <div className="bg-white rounded-xl border border-gray-200 p-5">
                             <div className="flex items-center gap-3">
                                 <div className="p-2 bg-red-50 rounded-lg">
-                                    <XCircle size={20} className="text-red-600" />
+                                    <XCircle size={20} className="text-red-600"/>
                                 </div>
                                 <div>
                                     <p className="text-sm text-gray-500">Unpaid</p>
@@ -258,7 +249,7 @@ export default function LiveSessionsPage() {
                         <div className="bg-white rounded-xl border border-gray-200 p-5">
                             <div className="flex items-center gap-3">
                                 <div className="p-2 bg-purple-50 rounded-lg">
-                                    <DollarSign size={20} className="text-purple-600" />
+                                    <DollarSign size={20} className="text-purple-600"/>
                                 </div>
                                 <div>
                                     <p className="text-sm text-gray-500">Current Revenue</p>
@@ -274,7 +265,7 @@ export default function LiveSessionsPage() {
                     <div className="bg-white rounded-xl border border-gray-200 p-4 mb-6">
                         <div className="flex flex-wrap items-center gap-4">
                             <div className="flex-1 min-w-[200px] relative">
-                                <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                                <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"/>
                                 <input
                                     type="text"
                                     placeholder="Search by name, plate, or spot..."
@@ -284,7 +275,7 @@ export default function LiveSessionsPage() {
                                 />
                             </div>
                             <div className="flex items-center gap-2">
-                                <Filter size={16} className="text-gray-500" />
+                                <Filter size={16} className="text-gray-500"/>
                                 <select
                                     value={filterStatus}
                                     onChange={(e) => setFilterStatus(e.target.value)}
@@ -304,7 +295,7 @@ export default function LiveSessionsPage() {
                                     }}
                                     className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
                                 >
-                                    <XCircle size={14} /> Clear
+                                    <XCircle size={14}/> Clear
                                 </button>
                             )}
                         </div>
@@ -313,7 +304,7 @@ export default function LiveSessionsPage() {
                     {/* Sessions Table / Card List */}
                     {filteredSessions.length === 0 ? (
                         <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
-                            <Car size={48} className="mx-auto text-gray-300 mb-4" />
+                            <Car size={48} className="mx-auto text-gray-300 mb-4"/>
                             <h3 className="text-lg font-medium text-gray-800 mb-1">No active sessions</h3>
                             <p className="text-gray-500">All parking spots are currently free.</p>
                         </div>
@@ -352,19 +343,22 @@ export default function LiveSessionsPage() {
                                         <tr key={session.id} className="hover:bg-gray-50 transition-colors">
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="flex items-center">
-                                                    <div className="flex-shrink-0 h-10 w-10 bg-gray-100 rounded-full flex items-center justify-center">
-                                                        <Users size={18} className="text-gray-600" />
+                                                    <div
+                                                        className="flex-shrink-0 h-10 w-10 bg-gray-100 rounded-full flex items-center justify-center">
+                                                        <Users size={18} className="text-gray-600"/>
                                                     </div>
                                                     <div className="ml-4">
                                                         <div className="text-sm font-medium text-gray-900">
                                                             {session.userName}
                                                         </div>
-                                                        <div className="text-sm text-gray-500">{session.vehiclePlate}</div>
+                                                        <div
+                                                            className="text-sm text-gray-500">{session.vehiclePlate}</div>
                                                     </div>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          <span
+                              className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                             {session.spotNumber}
                           </span>
                                             </td>
@@ -376,8 +370,9 @@ export default function LiveSessionsPage() {
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="flex items-center gap-1 text-sm">
-                                                    <Clock size={14} className="text-gray-400" />
-                                                    <span className="font-mono">{formatDuration(session.duration)}</span>
+                                                    <Clock size={14} className="text-gray-400"/>
+                                                    <span
+                                                        className="font-mono">{formatDuration(session.duration)}</span>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
@@ -396,15 +391,16 @@ export default function LiveSessionsPage() {
                                                         }
                                                         className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                                                     >
-                                                        <MoreVertical size={18} className="text-gray-600" />
+                                                        <MoreVertical size={18} className="text-gray-600"/>
                                                     </button>
                                                     {showActionsMenu === session.id && (
-                                                        <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10">
+                                                        <div
+                                                            className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10">
                                                             <button
                                                                 onClick={() => handleForceEnd(session.id)}
                                                                 className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                                                             >
-                                                                <XCircle size={16} className="text-orange-600" />
+                                                                <XCircle size={16} className="text-orange-600"/>
                                                                 Force End Session
                                                             </button>
                                                             {(session.status === "overdue" || session.status === "unpaid") && (
@@ -412,7 +408,7 @@ export default function LiveSessionsPage() {
                                                                     onClick={() => handleMarkAsPaid(session.id)}
                                                                     className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                                                                 >
-                                                                    <CheckCircle size={16} className="text-green-600" />
+                                                                    <CheckCircle size={16} className="text-green-600"/>
                                                                     Mark as Paid
                                                                 </button>
                                                             )}
@@ -420,7 +416,7 @@ export default function LiveSessionsPage() {
                                                                 onClick={() => handleApplyPenalty(session.id)}
                                                                 className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                                                             >
-                                                                <DollarSign size={16} className="text-yellow-600" />
+                                                                <DollarSign size={16} className="text-yellow-600"/>
                                                                 Apply Penalty
                                                             </button>
                                                             <div className="border-t border-gray-100 my-1"></div>
@@ -428,7 +424,7 @@ export default function LiveSessionsPage() {
                                                                 onClick={() => handleBanUser(session.userId, session.userName)}
                                                                 className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
                                                             >
-                                                                <UserX size={16} />
+                                                                <UserX size={16}/>
                                                                 Ban User
                                                             </button>
                                                         </div>
@@ -447,8 +443,9 @@ export default function LiveSessionsPage() {
                                     <div key={session.id} className="p-4 space-y-3">
                                         <div className="flex justify-between items-start">
                                             <div className="flex items-center gap-3">
-                                                <div className="h-10 w-10 bg-gray-100 rounded-full flex items-center justify-center">
-                                                    <Users size={18} className="text-gray-600" />
+                                                <div
+                                                    className="h-10 w-10 bg-gray-100 rounded-full flex items-center justify-center">
+                                                    <Users size={18} className="text-gray-600"/>
                                                 </div>
                                                 <div>
                                                     <p className="font-medium text-gray-900">{session.userName}</p>
@@ -472,7 +469,7 @@ export default function LiveSessionsPage() {
                         </span>
                                             </div>
                                             <div className="flex items-center gap-1">
-                                                <Clock size={14} className="text-gray-400" />
+                                                <Clock size={14} className="text-gray-400"/>
                                                 <span className="font-mono">{formatDuration(session.duration)}</span>
                                             </div>
                                             <div>
@@ -485,27 +482,27 @@ export default function LiveSessionsPage() {
                                                 onClick={() => handleForceEnd(session.id)}
                                                 className="px-3 py-1.5 text-xs bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center gap-1"
                                             >
-                                                <XCircle size={14} /> End
+                                                <XCircle size={14}/> End
                                             </button>
                                             {(session.status === "overdue" || session.status === "unpaid") && (
                                                 <button
                                                     onClick={() => handleMarkAsPaid(session.id)}
                                                     className="px-3 py-1.5 text-xs bg-green-50 text-green-700 hover:bg-green-100 rounded-lg flex items-center gap-1"
                                                 >
-                                                    <CheckCircle size={14} /> Paid
+                                                    <CheckCircle size={14}/> Paid
                                                 </button>
                                             )}
                                             <button
                                                 onClick={() => handleApplyPenalty(session.id)}
                                                 className="px-3 py-1.5 text-xs bg-yellow-50 text-yellow-700 hover:bg-yellow-100 rounded-lg flex items-center gap-1"
                                             >
-                                                <DollarSign size={14} /> Penalty
+                                                <DollarSign size={14}/> Penalty
                                             </button>
                                             <button
                                                 onClick={() => handleBanUser(session.userId, session.userName)}
                                                 className="px-3 py-1.5 text-xs bg-red-50 text-red-700 hover:bg-red-100 rounded-lg flex items-center gap-1"
                                             >
-                                                <UserX size={14} /> Ban
+                                                <UserX size={14}/> Ban
                                             </button>
                                         </div>
                                     </div>
@@ -515,11 +512,11 @@ export default function LiveSessionsPage() {
                     )}
                 </div>
             </div>
-        </div>
+        </AdminSidebar>
     );
 }
 
-function DollarSign({ size, className }: any) {
+function DollarSign({size, className}: any) {
     return (
         <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -533,8 +530,8 @@ function DollarSign({ size, className }: any) {
             strokeLinejoin="round"
             className={className}
         >
-            <line x1="12" y1="1" x2="12" y2="23" />
-            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+            <line x1="12" y1="1" x2="12" y2="23"/>
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
         </svg>
     );
 }

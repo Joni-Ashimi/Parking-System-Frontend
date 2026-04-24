@@ -161,9 +161,8 @@ export default function ViolationsPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-slate-50">
-            <AdminSidebar/>
-            <div className="ml-64">
+        <AdminSidebar>
+            <div className="min-h-screen bg-gradient-to-br from-gray-50 to-slate-50">
                 <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 px-8 py-4 sticky top-0 z-10">
                     <div className="flex justify-between items-center flex-wrap gap-4">
                         <div>
@@ -453,6 +452,6 @@ export default function ViolationsPage() {
                     )}
                 </div>
             </div>
-        </div>
+        </AdminSidebar>
     );
 }

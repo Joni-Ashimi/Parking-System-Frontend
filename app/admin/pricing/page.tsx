@@ -1,25 +1,33 @@
 "use client";
 
-import { useState } from "react";
-import {
-    Car,
-    Bike,
-    Truck,
-    Edit2,
-    Save,
-    X,
-    AlertCircle,
-    Plus,
-    Shield,
-} from "lucide-react";
+import {useState} from "react";
+import {AlertCircle, Bike, Car, Edit2, Plus, Save, Shield, Truck, X,} from "lucide-react";
 import AdminSidebar from "@/components/sidebar/adminSidebar";
 
 export default function PricingPage() {
     const [editingId, setEditingId] = useState<string | null>(null);
     const [prices, setPrices] = useState([
-        { id: "bike", type: "Motorcycle", icon: Bike, basePrice: 2, hourlyRate: 2, dailyRate: 15, size: "Small", spots: 15 },
-        { id: "car", type: "Car", icon: Car, basePrice: 5, hourlyRate: 5, dailyRate: 35, size: "Standard", spots: 35 },
-        { id: "truck", type: "Truck", icon: Truck, basePrice: 10, hourlyRate: 10, dailyRate: 70, size: "Large", spots: 10 },
+        {
+            id: "bike",
+            type: "Motorcycle",
+            icon: Bike,
+            basePrice: 2,
+            hourlyRate: 2,
+            dailyRate: 15,
+            size: "Small",
+            spots: 15
+        },
+        {id: "car", type: "Car", icon: Car, basePrice: 5, hourlyRate: 5, dailyRate: 35, size: "Standard", spots: 35},
+        {
+            id: "truck",
+            type: "Truck",
+            icon: Truck,
+            basePrice: 10,
+            hourlyRate: 10,
+            dailyRate: 70,
+            size: "Large",
+            spots: 10
+        },
     ]);
 
     const [editForm, setEditForm] = useState({
@@ -38,7 +46,7 @@ export default function PricingPage() {
     const handleSave = (id: string) => {
         setPrices(prices.map(price =>
             price.id === id
-                ? { ...price, hourlyRate: editForm.hourlyRate, dailyRate: editForm.dailyRate }
+                ? {...price, hourlyRate: editForm.hourlyRate, dailyRate: editForm.dailyRate}
                 : price
         ));
         setEditingId(null);
@@ -49,9 +57,8 @@ export default function PricingPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <AdminSidebar />
-            <div className="ml-64">
+        <AdminSidebar>
+            <div className="min-h-screen bg-gray-50">
                 <header className="bg-white border-b border-gray-200 px-8 py-4">
                     <div className="flex justify-between items-center">
                         <h1 className="text-2xl font-semibold text-gray-800">
@@ -59,7 +66,7 @@ export default function PricingPage() {
                         </h1>
                         <div className="flex items-center gap-3">
                             <div className="flex items-center gap-2 px-3 py-1 bg-gray-100 rounded-lg">
-                                <Shield size={16} className="text-green-600" />
+                                <Shield size={16} className="text-green-600"/>
                                 <span className="text-sm text-gray-600">Admin Access</span>
                             </div>
                         </div>
@@ -90,7 +97,8 @@ export default function PricingPage() {
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
                         {prices.map((price) => (
-                            <div key={price.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow">
+                            <div key={price.id}
+                                 className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow">
                                 <div className={`p-6 ${
                                     price.id === "car" ? "bg-gradient-to-r from-blue-50 to-blue-100" : "bg-gray-50"
                                 }`}>
@@ -98,10 +106,11 @@ export default function PricingPage() {
                                         <div className={`p-3 rounded-xl ${
                                             price.id === "car" ? "bg-blue-600 text-white" : "bg-white text-gray-700"
                                         }`}>
-                                            <price.icon size={24} />
+                                            <price.icon size={24}/>
                                         </div>
                                         {price.id === "car" && (
-                                            <span className="px-2 py-1 bg-blue-600 text-white text-xs rounded-full">
+                                            <span
+                                                className="px-2 py-1 bg-blue-600 text-white text-xs rounded-full">
                         Most Popular
                       </span>
                                         )}
@@ -111,7 +120,8 @@ export default function PricingPage() {
                                 </div>
 
                                 <div className="p-6 space-y-4">
-                                    <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                                    <div
+                                        className="flex justify-between items-center py-2 border-b border-gray-100">
                                         <span className="text-gray-600">Hourly Rate</span>
                                         {editingId === price.id ? (
                                             <div className="flex items-center gap-2">
@@ -119,7 +129,10 @@ export default function PricingPage() {
                                                 <input
                                                     type="number"
                                                     value={editForm.hourlyRate}
-                                                    onChange={(e) => setEditForm({ ...editForm, hourlyRate: parseFloat(e.target.value) })}
+                                                    onChange={(e) => setEditForm({
+                                                        ...editForm,
+                                                        hourlyRate: parseFloat(e.target.value)
+                                                    })}
                                                     className="w-20 px-2 py-1 border border-gray-200 rounded text-right focus:outline-none focus:border-blue-400"
                                                     step="0.50"
                                                 />
@@ -132,7 +145,8 @@ export default function PricingPage() {
                                         )}
                                     </div>
 
-                                    <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                                    <div
+                                        className="flex justify-between items-center py-2 border-b border-gray-100">
                                         <span className="text-gray-600">Daily Rate</span>
                                         {editingId === price.id ? (
                                             <div className="flex items-center gap-2">
@@ -140,7 +154,10 @@ export default function PricingPage() {
                                                 <input
                                                     type="number"
                                                     value={editForm.dailyRate}
-                                                    onChange={(e) => setEditForm({ ...editForm, dailyRate: parseFloat(e.target.value) })}
+                                                    onChange={(e) => setEditForm({
+                                                        ...editForm,
+                                                        dailyRate: parseFloat(e.target.value)
+                                                    })}
                                                     className="w-20 px-2 py-1 border border-gray-200 rounded text-right focus:outline-none focus:border-blue-400"
                                                     step="5"
                                                 />
@@ -166,14 +183,14 @@ export default function PricingPage() {
                                                     onClick={() => handleSave(price.id)}
                                                     className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-2"
                                                 >
-                                                    <Save size={16} />
+                                                    <Save size={16}/>
                                                     Save
                                                 </button>
                                                 <button
                                                     onClick={handleCancel}
                                                     className="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition flex items-center justify-center gap-2"
                                                 >
-                                                    <X size={16} />
+                                                    <X size={16}/>
                                                     Cancel
                                                 </button>
                                             </>
@@ -182,7 +199,7 @@ export default function PricingPage() {
                                                 onClick={() => handleEdit(price)}
                                                 className="w-full px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition flex items-center justify-center gap-2"
                                             >
-                                                <Edit2 size={16} />
+                                                <Edit2 size={16}/>
                                                 Edit Pricing
                                             </button>
                                         )}
@@ -195,8 +212,9 @@ export default function PricingPage() {
                     <div className="bg-white rounded-xl border border-gray-200 p-6 mb-8">
                         <div className="flex items-center justify-between mb-4">
                             <h3 className="font-semibold text-gray-800">Special Offers</h3>
-                            <button className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1">
-                                <Plus size={14} />
+                            <button
+                                className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1">
+                                <Plus size={14}/>
                                 Add Offer
                             </button>
                         </div>
@@ -230,22 +248,25 @@ export default function PricingPage() {
                     </div>
 
                     <div className="bg-blue-50 rounded-xl p-4 flex items-start gap-3">
-                        <AlertCircle size={18} className="text-blue-600 mt-0.5" />
+                        <AlertCircle size={18} className="text-blue-600 mt-0.5"/>
                         <div>
                             <p className="text-sm font-medium text-blue-800">Pricing Notes</p>
                             <p className="text-xs text-blue-600 mt-1">
-                                Changes to pricing will take effect immediately. Customers with active sessions will be charged at the new rates.
+                                Changes to pricing will take effect immediately. Customers with active sessions
+                                will be charged at the new rates.
                             </p>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </AdminSidebar>
     );
 }
 
 
-function PricingStatCard({ title, value, change, trend }: any) {
+function PricingStatCard({
+                             title, value, change, trend
+                         }: any) {
     return (
         <div className="bg-white rounded-xl border border-gray-200 p-6">
             <p className="text-sm text-gray-500 mb-2">{title}</p>
@@ -259,7 +280,9 @@ function PricingStatCard({ title, value, change, trend }: any) {
     );
 }
 
-function OfferCard({ title, description, discount, validUntil }: any) {
+function OfferCard({
+                       title, description, discount, validUntil
+                   }: any) {
     return (
         <div className="border border-gray-200 rounded-lg p-4 hover:border-blue-200 hover:shadow-sm transition-all">
             <div className="flex justify-between items-start mb-2">
