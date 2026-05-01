@@ -29,7 +29,7 @@ export default function LoginPage() {
             const response = await AuthService.login(email, password);
             const { user, accessToken, refreshToken } = response.data;
             dispatch(loginSucces({ user, accessToken, refreshToken }));
-            router.push("/admin/dashboard");
+            router.push("/user/dashboard");
         } catch (err) {
             handleRequestErrors(err);
         } finally {

@@ -7,7 +7,7 @@ import {
     Car,
     Map,
     Menu,
-    ParkingSquare,
+    ParkingSquare, User,
 } from "lucide-react";
 
 export default function UserSidebar({ children} : { children: React.ReactNode}) {
@@ -53,7 +53,8 @@ export default function UserSidebar({ children} : { children: React.ReactNode}) 
                     <nav className="space-y-1">
                         <NavItem icon={<LayoutDashboard size={18} />} label="Dashboard" href="/user/dashboard" isOpen={isOpen} />
                         <NavItem icon={<Car size={18} />} label="My Vehicles" href="/user/my-vehicles" isOpen={isOpen} />
-                        <NavItem icon={<ParkingSquare size={18} />} label="My Parking" href="/user/parking" isOpen={isOpen} />
+                        <NavItem icon={<ParkingSquare size={18} />} label="Live Parking" href="/user/parking" isOpen={isOpen} />
+                        <NavItem icon={<User size={18} />} label="Profile" href="/user/me" isOpen={isOpen} />
                     </nav>
                 </div>
             </div>
