@@ -27,9 +27,9 @@ export default function LoginPage() {
         dispatch(showLoader("Logging in..."));
         try {
             const response = await AuthService.login(email, password);
-            const { user, accessToken, refreshToken } = response.data.data;
+            const { user, accessToken, refreshToken } = response.data;
             dispatch(loginSucces({ user, accessToken, refreshToken }));
-            router.push(' /');
+            router.push("/admin/dashboard");
         } catch (err) {
             handleRequestErrors(err);
         } finally {

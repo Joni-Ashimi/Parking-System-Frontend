@@ -45,11 +45,11 @@ export default function RegisterPage() {
                 confirmPassword,
             );
 
-            const { user, accessToken, refreshToken } = response.data.data;
+            const { user, accessToken, refreshToken } = response.data;
 
             dispatch(loginSucces({ user, accessToken, refreshToken }));
 
-            router.push("/");
+            router.push("/admin/dashboard");
         } catch (err) {
             handleRequestErrors(err);
         } finally {

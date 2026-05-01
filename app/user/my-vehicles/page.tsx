@@ -1,11 +1,14 @@
 "use client";
 
-import {useState} from "react";
-import {AlertCircle, ArrowLeft, Bike, Car, Check, Plus, Star, Trash2, Truck,} from "lucide-react";
+import {useCallback, useEffect, useState} from "react";
+import {AlertCircle, ArrowLeft, Bike, Car, Check, Loader2, Plus, Star, Trash2, Truck,} from "lucide-react";
 import Link from "next/link";
 import UserSidebar from "@/components/sidebar/userSidebar";
+import VehicleService from "@/services/VehicleService";
+import {useSelector} from "react-redux";
+import type {RootState} from "@/store/store";
 
-type VehicleType = "car" | "bike" | "truck";
+type VehicleType = "car" | "motorcycle" | "truck";
 
 interface Vehicle {
     id: string;
@@ -14,66 +17,109 @@ interface Vehicle {
     isDefault: boolean;
 }
 
-// Mock user vehicles
-const mockVehicles: Vehicle[] = [
-    {id: "v1", plateNumber: "ABC-1234", type: "car", isDefault: true},
-    {id: "v2", plateNumber: "MOTO-567", type: "bike", isDefault: false},
-    {id: "v3", plateNumber: "TRK-9012", type: "truck", isDefault: false},
-];
-
 export default function VehiclesPage() {
-    const [vehicles, setVehicles] = useState<Vehicle[]>(mockVehicles);
+    const user = useSelector((state: RootState) => state.auth.user);
+    const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [fetchError, setFetchError] = useState("");
+
     const [showAddModal, setShowAddModal] = useState(false);
     const [newPlate, setNewPlate] = useState("");
     const [newType, setNewType] = useState<VehicleType>("car");
-    const [error, setError] = useState("");
+    const [submitting, setSubmitting] = useState(false);
+    const [formError, setFormError] = useState("");
+
+    const [deletingId, setDeletingId] = useState<string | null>(null);
+
+    const fetchVehicles = useCallback(async () => {
+        if (!user?.id) return;
+        setLoading(true);
+        setFetchError("");
+        try {
+            const res = await VehicleService.getAll(user.id);
+            const data: Vehicle[] = res.data.map((v: any, i: number) => ({
+                id: v.id,
+                plateNumber: v.plateNumber,
+                type: v.type as VehicleType,
+                isDefault: i === 0, // first vehicle is default; adjust if backend adds this field
+            }));
+            setVehicles(data);
+        } catch {
+            setFetchError("Failed to load vehicles. Please try again.");
+        } finally {
+            setLoading(false);
+        }
+    }, [user?.id]);
+
+    useEffect(() => {
+        fetchVehicles();
+    }, [fetchVehicles]);
 
     const handleSetDefault = (id: string) => {
-        setVehicles((prev) =>
-            prev.map((v) => ({...v, isDefault: v.id === id}))
-        );
+        setVehicles((prev) => prev.map((v) => ({...v, isDefault: v.id === id})));
     };
 
-    const handleDelete = (id: string) => {
-        setVehicles((prev) => {
-            const filtered = prev.filter((v) => v.id !== id);
-            // If deleted vehicle was default, set first remaining as default
-            if (filtered.length > 0 && !filtered.some((v) => v.isDefault)) {
-                filtered[0].isDefault = true;
-            }
-            return filtered;
-        });
+    const handleDelete = async (id: string) => {
+        setDeletingId(id);
+        try {
+            await VehicleService.delete(id);
+            setVehicles((prev) => {
+                const filtered = prev.filter((v) => v.id !== id);
+                if (filtered.length > 0 && !filtered.some((v) => v.isDefault)) {
+                    filtered[0] = {...filtered[0], isDefault: true};
+                }
+                return filtered;
+            });
+        } catch {
+            setFetchError("Failed to delete vehicle. Please try again.");
+        } finally {
+            setDeletingId(null);
+        }
     };
 
-    const handleAddVehicle = () => {
-        setError("");
+    const handleAddVehicle = async () => {
+        setFormError("");
         const plateRegex = /^[A-Z0-9-]{3,10}$/;
         if (!plateRegex.test(newPlate.toUpperCase())) {
-            setError("Invalid plate format (3-10 chars, letters, numbers, hyphens).");
+            setFormError("Invalid plate format (3–10 chars, letters, numbers, hyphens).");
             return;
         }
         if (vehicles.some((v) => v.plateNumber === newPlate.toUpperCase())) {
-            setError("This plate is already registered.");
+            setFormError("This plate is already registered.");
             return;
         }
 
-        const newVehicle: Vehicle = {
-            id: Date.now().toString(),
-            plateNumber: newPlate.toUpperCase(),
-            type: newType,
-            isDefault: vehicles.length === 0, // first vehicle becomes default
-        };
-        setVehicles((prev) => [...prev, newVehicle]);
-        setNewPlate("");
-        setNewType("car");
-        setShowAddModal(false);
+        setSubmitting(true);
+        try {
+            console.log('here1');
+            const res = await VehicleService.create(newPlate.toUpperCase(), newType, user!.id);
+            console.log('here2');
+            const created: Vehicle = {
+                id: res.data.id,
+                plateNumber: res.data.plateNumber,
+                type: res.data.type as VehicleType,
+                isDefault: vehicles.length === 0,
+            };
+            setVehicles((prev) => [...prev, created]);
+            setNewPlate("");
+            setNewType("car");
+            setShowAddModal(false);
+        } catch (err: any) {
+            const msg = err?.response?.data?.message;
+            console.log('error: ', err?.message)
+            setFormError(msg === "Vehicle with this plate already exists"
+                ? "This plate is already registered on our system."
+                : "Failed to add vehicle. Please try again.");
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     const getVehicleIcon = (type: VehicleType) => {
         switch (type) {
             case "car":
                 return <Car size={28} className="text-blue-600"/>;
-            case "bike":
+            case "motorcycle":
                 return <Bike size={28} className="text-emerald-600"/>;
             case "truck":
                 return <Truck size={28} className="text-amber-600"/>;
@@ -84,7 +130,7 @@ export default function VehiclesPage() {
         switch (type) {
             case "car":
                 return "Car";
-            case "bike":
+            case "motorcycle":
                 return "Motorcycle";
             case "truck":
                 return "Truck / Van";
@@ -120,13 +166,25 @@ export default function VehiclesPage() {
                     </header>
 
                     <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-                        {vehicles.length === 0 ? (
+                        {/* Global error banner */}
+                        {fetchError && (
+                            <div
+                                className="mb-6 flex items-start gap-3 bg-red-50 text-red-800 text-sm p-4 rounded-xl border border-red-200">
+                                <AlertCircle size={18} className="flex-shrink-0 mt-0.5"/>
+                                <p>{fetchError}</p>
+                            </div>
+                        )}
+
+                        {/* Loading state */}
+                        {loading ? (
+                            <div className="flex items-center justify-center py-24">
+                                <Loader2 size={36} className="animate-spin text-blue-500"/>
+                            </div>
+                        ) : vehicles.length === 0 ? (
                             <div className="text-center py-20 bg-white rounded-2xl border border-gray-200 shadow-sm">
                                 <Car size={48} className="mx-auto text-gray-300 mb-4"/>
                                 <h3 className="text-xl font-semibold text-gray-800 mb-2">No vehicles yet</h3>
-                                <p className="text-gray-500 mb-6">
-                                    Add your first vehicle to start parking.
-                                </p>
+                                <p className="text-gray-500 mb-6">Add your first vehicle to start parking.</p>
                                 <button
                                     onClick={() => setShowAddModal(true)}
                                     className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium"
@@ -141,20 +199,20 @@ export default function VehiclesPage() {
                                     <div
                                         key={vehicle.id}
                                         className={`
-                    relative bg-white rounded-2xl border-2 p-5 shadow-sm transition-all
-                    ${vehicle.isDefault ? "border-blue-500 ring-1 ring-blue-200" : "border-gray-100 hover:border-gray-200"}
-                  `}
+                      relative bg-white rounded-2xl border-2 p-5 shadow-sm transition-all
+                      ${vehicle.isDefault
+                                            ? "border-blue-500 ring-1 ring-blue-200"
+                                            : "border-gray-100 hover:border-gray-200"}
+                    `}
                                     >
-                                        {/* Default Badge */}
                                         {vehicle.isDefault && (
                                             <span
                                                 className="absolute -top-2.5 right-4 inline-flex items-center gap-1 bg-blue-600 text-white text-xs font-medium px-3 py-1 rounded-full shadow-sm">
-                      <Star size={12} fill="currentColor"/>
-                      Default
-                    </span>
+                        <Star size={12} fill="currentColor"/>
+                        Default
+                      </span>
                                         )}
 
-                                        {/* Vehicle Info */}
                                         <div className="flex items-start gap-4">
                                             <div className="p-3 bg-gray-100 rounded-xl">
                                                 {getVehicleIcon(vehicle.type)}
@@ -163,13 +221,10 @@ export default function VehiclesPage() {
                                                 <h3 className="text-xl font-bold text-gray-800 tracking-wider">
                                                     {vehicle.plateNumber}
                                                 </h3>
-                                                <p className="text-sm text-gray-500 mt-1">
-                                                    {getTypeLabel(vehicle.type)}
-                                                </p>
+                                                <p className="text-sm text-gray-500 mt-1">{getTypeLabel(vehicle.type)}</p>
                                             </div>
                                         </div>
 
-                                        {/* Actions */}
                                         <div className="mt-5 pt-4 border-t border-gray-100 flex gap-2">
                                             {!vehicle.isDefault && (
                                                 <button
@@ -182,16 +237,19 @@ export default function VehiclesPage() {
                                             )}
                                             <button
                                                 onClick={() => handleDelete(vehicle.id)}
-                                                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-medium text-red-700 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
+                                                disabled={deletingId === vehicle.id}
+                                                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-medium text-red-700 bg-red-50 rounded-lg hover:bg-red-100 transition-colors disabled:opacity-50"
                                             >
-                                                <Trash2 size={16}/>
+                                                {deletingId === vehicle.id
+                                                    ? <Loader2 size={16} className="animate-spin"/>
+                                                    : <Trash2 size={16}/>}
                                                 Remove
                                             </button>
                                         </div>
                                     </div>
                                 ))}
 
-                                {/* Add Vehicle Card (button) */}
+                                {/* Add card */}
                                 <button
                                     onClick={() => setShowAddModal(true)}
                                     className="border-2 border-dashed border-gray-300 rounded-2xl flex flex-col items-center justify-center gap-3 p-8 text-gray-500 hover:border-blue-400 hover:text-blue-600 transition-all min-h-[200px] bg-white/50"
@@ -202,8 +260,7 @@ export default function VehiclesPage() {
                             </div>
                         )}
 
-                        {/* Info Note */}
-                        {vehicles.length > 0 && (
+                        {!loading && vehicles.length > 0 && (
                             <div
                                 className="mt-8 flex items-start gap-3 bg-blue-50 text-blue-800 text-sm p-4 rounded-xl border border-blue-200">
                                 <AlertCircle size={18} className="flex-shrink-0 mt-0.5"/>
@@ -217,13 +274,14 @@ export default function VehiclesPage() {
                 </div>
             </UserSidebar>
 
+            {/* Add modal */}
             {showAddModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                     <div
                         className="absolute inset-0 bg-black/30 backdrop-blur-sm"
                         onClick={() => {
                             setShowAddModal(false);
-                            setError("");
+                            setFormError("");
                         }}
                     />
                     <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in">
@@ -240,13 +298,14 @@ export default function VehiclesPage() {
                                     type="text"
                                     value={newPlate}
                                     onChange={(e) => setNewPlate(e.target.value)}
+                                    onKeyDown={(e) => e.key === "Enter" && handleAddVehicle()}
                                     placeholder="ABC-1234"
                                     className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 uppercase"
                                     maxLength={10}
                                 />
-                                {error && (
+                                {formError && (
                                     <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
-                                        <AlertCircle size={12}/> {error}
+                                        <AlertCircle size={12}/> {formError}
                                     </p>
                                 )}
                             </div>
@@ -256,7 +315,7 @@ export default function VehiclesPage() {
                                     Vehicle Type
                                 </label>
                                 <div className="grid grid-cols-3 gap-3">
-                                    {(["car", "bike", "truck"] as VehicleType[]).map((type) => (
+                                    {(["car", "motorcycle", "truck"] as VehicleType[]).map((type) => (
                                         <button
                                             key={type}
                                             type="button"
@@ -265,14 +324,14 @@ export default function VehiclesPage() {
                         py-4 px-2 rounded-xl border-2 flex flex-col items-center gap-2 transition-all
                         ${newType === type
                                                 ? "border-blue-500 bg-blue-50 text-blue-700"
-                                                : "border-gray-200 hover:border-gray-300 text-gray-600"
-                                            }
+                                                : "border-gray-200 hover:border-gray-300 text-gray-600"}
                       `}
                                         >
                                             {type === "car" && <Car size={24}/>}
-                                            {type === "bike" && <Bike size={24}/>}
+                                            {type === "motorcycle" && <Bike size={24}/>}
                                             {type === "truck" && <Truck size={24}/>}
-                                            <span className="text-xs font-medium capitalize">{type}</span>
+                                            <span
+                                                className="text-xs font-medium capitalize">{type.charAt(0).toUpperCase() + type.slice(1)}</span>
                                         </button>
                                     ))}
                                 </div>
@@ -283,17 +342,21 @@ export default function VehiclesPage() {
                             <button
                                 onClick={() => {
                                     setShowAddModal(false);
-                                    setError("");
+                                    setFormError("");
                                 }}
-                                className="px-4 py-2 text-gray-700 font-medium hover:bg-gray-200 rounded-xl transition-colors"
+                                disabled={submitting}
+                                className="px-4 py-2 text-gray-700 font-medium hover:bg-gray-200 rounded-xl transition-colors disabled:opacity-50"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={handleAddVehicle}
-                                className="px-5 py-2 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition-colors flex items-center gap-2"
+                                disabled={submitting}
+                                className="px-5 py-2 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition-colors flex items-center gap-2 disabled:opacity-60"
                             >
-                                <Plus size={18}/>
+                                {submitting
+                                    ? <Loader2 size={18} className="animate-spin"/>
+                                    : <Plus size={18}/>}
                                 Add Vehicle
                             </button>
                         </div>
