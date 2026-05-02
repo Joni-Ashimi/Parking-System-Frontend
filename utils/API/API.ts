@@ -19,13 +19,10 @@ let refreshTokenPromise: Promise<string | null> | null = null;
 
 const getNewToken = async (): Promise<string | null> => {
     try {
-        console.log("Refreshing token...");
         const { refreshToken } = store.getState().auth;
-        console.log("REFRESH TOKEN:", refreshToken);
         if (!refreshToken) throw new Error("No refresh token");
 
         const response = await refreshAPI.post("/auth/refresh", { refreshToken });
-        console.log("REFRESH RAW RESPONSE:", response.data);
         const { accessToken: newAccessToken, user: newUser } = response.data;
 
         store.dispatch(loginSucces({
@@ -36,9 +33,8 @@ const getNewToken = async (): Promise<string | null> => {
 
         return newAccessToken;
     } catch (error) {
-        console.error("❌ REFRESH FAILED FULL ERROR:", error);
-        // store.dispatch(logOut());
-        // if (typeof window !== "undefined") window.location.href = "/login";
+        store.dispatch(logOut());
+        if (typeof window !== "undefined") window.location.href = "/login";
         return null;
     } finally {
         refreshTokenPromise = null;

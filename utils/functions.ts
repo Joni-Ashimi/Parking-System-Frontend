@@ -3,8 +3,19 @@ import axios from 'axios';
 import {ApiError} from "@/utils/types/ApiResponse";
 
 export const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString();
+    const date = new Date(dateString);
+
+    if (isNaN(date.getTime())) return "-";
+
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+
+    return `${day}-${month}-${year}`;
 };
+
+export const safePercent = (users: any, count: number) =>
+    users.length ? Math.round((count / users.length) * 100) : 0;
 
 export const showSuccess = (message: string, timeout = 2000) => {
     toast.success(message, {
