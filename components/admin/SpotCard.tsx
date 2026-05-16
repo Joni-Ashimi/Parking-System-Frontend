@@ -1,10 +1,10 @@
-import {Check, Car, Wrench, Edit, Trash2, Bike, DollarSign, Clock, Truck} from "lucide-react";
+import {Bike, Car, Check, Clock, DollarSign, Edit, ShieldAlert, Trash2, Truck, Wrench} from "lucide-react";
 import {ParkingSpot} from "@/app/admin/parkingSpots/page";
 
 interface SpotCardProps {
     spot: ParkingSpot;
     onEdit: (spot: ParkingSpot) => void;
-    onDelete: (id: string) => void;
+    onDelete: (spot: ParkingSpot) => void;
     onToggleMaintenance: (id: string) => void;
 }
 
@@ -39,6 +39,16 @@ const statusConfig = {
         badge: "bg-orange-100 text-orange-800 border-orange-200",
         shadow: "hover:shadow-orange-100",
     },
+    reserved: {
+        label: "Reserved",
+        icon: ShieldAlert,
+        gradient: "from-purple-400 to-fuchsia-500",
+        bg: "bg-gradient-to-br from-purple-50 to-fuchsia-50",
+        border: "border-purple-200",
+        text: "text-purple-700",
+        badge: "bg-purple-100 text-purple-800 border-purple-200",
+        shadow: "hover:shadow-purple-100",
+    },
 };
 
 export default function SpotCard({spot, onEdit, onDelete, onToggleMaintenance}: SpotCardProps) {
@@ -50,7 +60,9 @@ export default function SpotCard({spot, onEdit, onDelete, onToggleMaintenance}: 
         medium: Car,
         large: Truck,
     };
-    const SizeIcon = sizeIcons[spot.size];
+    const spotSize = spot?.type?.size?.toLowerCase() as keyof typeof sizeIcons || "medium";
+    const SizeIcon = sizeIcons[spotSize] || Car;
+    const hourlyRate = Number(spot?.type?.baseHourlyRate || 0);
     return (
         <div
             className={`
@@ -97,7 +109,7 @@ export default function SpotCard({spot, onEdit, onDelete, onToggleMaintenance}: 
                             <Edit size={16}/>
                         </button>
                         <button
-                            onClick={() => onDelete(spot.id)}
+                            onClick={() => onDelete(spot)}
                             className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-100 rounded-xl transition-all duration-200 hover:scale-110"
                             title="Delete spot"
                         >
@@ -111,17 +123,18 @@ export default function SpotCard({spot, onEdit, onDelete, onToggleMaintenance}: 
                         <div
                             className="flex items-center gap-1.5 bg-white/60 backdrop-blur-sm px-2.5 py-1 rounded-lg shadow-sm">
                             <SizeIcon size={16} className="text-gray-600"/>
-                            <span className="font-medium text-gray-700 capitalize">{spot.size}</span>
+                            <span className="font-medium text-gray-700 capitalize">
+                                {spot.type?.size || 'Standard'}
+                            </span>
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
-                        <div
-                            className="flex items-center gap-1.5 bg-white/60 backdrop-blur-sm px-2.5 py-1 rounded-lg shadow-sm">
-                            <DollarSign size={16} className="text-emerald-600"/>
-                            <span className="font-semibold text-gray-800">
-                ${spot.pricePerHour.toFixed(2)}
-              </span>
-                            <span className="text-xs text-gray-500">/ hour</span>
+                        <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-1.5 bg-white/60 backdrop-blur-sm px-2.5 py-1 rounded-lg shadow-sm">
+                                <DollarSign size={16} className="text-emerald-600"/>
+                                <span className="font-semibold text-gray-800">${hourlyRate.toFixed(2)}</span>
+                                <span className="text-xs text-gray-500">/ hour</span>
+                            </div>
                         </div>
                     </div>
                 </div>

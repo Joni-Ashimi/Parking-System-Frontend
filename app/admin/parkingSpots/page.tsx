@@ -1,65 +1,112 @@
 "use client";
 
-import {useState} from "react";
+import {useCallback, useEffect, useState} from "react";
 import {AlertCircle, Check, Plus, X,} from "lucide-react";
 import AdminSidebar from "@/components/sidebar/adminSidebar";
 import SpotCard from "@/components/admin/SpotCard";
+import ParkingSpotService, {ParkingSpotPayload} from "@/services/ParkingSpotService";
+import SpotCategoryService from "@/services/SpotCategoryService";
+import Pagination from "@/components/core/Pagination";
+import ParkingLotService from "@/services/ParkingLotService";
+import {handleRequestErrors} from "@/utils/functions";
+import AdminActionModal from "@/app/admin/AdminActionModal";
 
 type VehicleSize = "small" | "medium" | "large";
-type SpotStatus = "available" | "occupied" | "maintenance";
+type SpotStatus = "available" | "occupied" | "maintenance" | 'reserved';
 
 export interface ParkingSpot {
     id: string;
     spotNumber: string;
-    size: VehicleSize;
+    floor: number;
     status: SpotStatus;
-    pricePerHour: number;
-}
+    type?: {
+        id: string;
+        name: string;
+        size: VehicleSize;
+        baseHourlyRate: string | number;
+    };
+    lot?: {
+        id: string;
+        name: string;
+    }
+};
 
-interface SizePricing {
-    small: number;
-    medium: number;
-    large: number;
-}
-
-// Mock Data
-const initialSpots: ParkingSpot[] = [
-    {id: "1", spotNumber: "A01", size: "small", status: "available", pricePerHour: 5},
-    {id: "2", spotNumber: "A02", size: "small", status: "occupied", pricePerHour: 5},
-    {id: "3", spotNumber: "B01", size: "medium", status: "available", pricePerHour: 8},
-    {id: "4", spotNumber: "B02", size: "medium", status: "maintenance", pricePerHour: 8},
-    {id: "5", spotNumber: "C01", size: "large", status: "available", pricePerHour: 12},
-    {id: "6", spotNumber: "C02", size: "large", status: "occupied", pricePerHour: 12},
-];
-
-const initialPricing: SizePricing = {
-    small: 5,
-    medium: 8,
-    large: 12,
+interface SpotCategory {
+    id: string;
+    name: string;
+    size: VehicleSize;
+    baseHourlyRate: number;
 };
 
 export default function ParkingSpotsConfig() {
-    const [spots, setSpots] = useState<ParkingSpot[]>(initialSpots);
-    const [pricing, setPricing] = useState<SizePricing>(initialPricing);
+    const [spots, setSpots] = useState<ParkingSpot[]>([]);
+    const [categories, setCategories] = useState<SpotCategory[]>([]);
+    const [lots, setLots] = useState<any[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingSpot, setEditingSpot] = useState<ParkingSpot | null>(null);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
+    const [selectedSpot, setSelectedSpot] = useState<ParkingSpot | null>(null);
+
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(8);
+    const [qs, setQs] = useState("");
+    const [meta, setMeta] = useState({totalPages: 1, total: 0, pageSize: 8});
+    const [stats, setStats] = useState({
+        totalSpots: 0,
+        availableSpots: 0,
+        occupiedSpots: 0,
+        maintenanceSpots: 0
+    });
+
     const [filterStatus, setFilterStatus] = useState<SpotStatus | "all">("all");
     const [filterSize, setFilterSize] = useState<VehicleSize | "all">("all");
 
+    const [loading, setLoading] = useState(true);
+
     const [formData, setFormData] = useState({
         spotNumber: "",
-        size: "medium" as VehicleSize,
+        floor: 1,
+        typeId: "",
         status: "available" as SpotStatus,
+        lotId: "",
     });
 
-    const totalSpots = spots.length;
-    const availableSpots = spots.filter((s) => s.status === "available").length;
-    const occupiedSpots = spots.filter((s) => s.status === "occupied").length;
-    const maintenanceSpots = spots.filter((s) => s.status === "maintenance").length;
+    const fetchData = useCallback(async () => {
+        try {
+            setLoading(true);
+            const [spotsResponse, categoriesResponse, stats, lotsResponse] = await Promise.all([
+                ParkingSpotService.findAll({page, pageSize, qs}),
+                SpotCategoryService.findAll(),
+                ParkingSpotService.getStats(),
+                ParkingLotService.findAll(),
+            ]);
+            setSpots(spotsResponse.data.data);
+            setMeta(spotsResponse.data.meta);
+            setCategories(categoriesResponse.data);
+            setStats(stats.data);
+            setLots(lotsResponse.data);
+            if (categoriesResponse.data.length > 0) {
+                setFormData((prev) => ({
+                    ...prev,
+                    typeId: categoriesResponse.data[0].id,
+                    lotId: lotsResponse?.data[0]?.id || ""
+                }));
+            }
+        } catch (error) {
+            handleRequestErrors(error);
+        } finally {
+            setLoading(false);
+        }
+    }, [page, pageSize, qs]);
 
-    const filteredSpots = spots.filter((spot) => {
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
+
+    const spotsList = Array.isArray(spots) ? spots : (spots as any).data || [];
+    const filteredSpots = spotsList.filter((spot: { status: string; type: { size: string; }; lot: { id: any; }; }) => {
         if (filterStatus !== "all" && spot.status !== filterStatus) return false;
-        if (filterSize !== "all" && spot.size !== filterSize) return false;
+        if (filterSize !== "all" && spot?.type?.size?.toLowerCase() !== filterSize) return false;
         return true;
     });
 
@@ -68,12 +115,20 @@ export default function ParkingSpotsConfig() {
             setEditingSpot(spot);
             setFormData({
                 spotNumber: spot.spotNumber,
-                size: spot.size,
+                floor: spot.floor || 1,
+                typeId: spot?.type?.id || categories[0]?.id,
                 status: spot.status,
+                lotId: spot?.lot?.id || lots[0]?.id,
             });
         } else {
             setEditingSpot(null);
-            setFormData({spotNumber: "", size: "medium", status: "available"});
+            setFormData({
+                spotNumber: "",
+                floor: 1,
+                typeId: categories[0]?.id || "",
+                status: "available",
+                lotId: lots[0]?.id || "",
+            });
         }
         setIsModalOpen(true);
     };
@@ -83,47 +138,82 @@ export default function ParkingSpotsConfig() {
         setEditingSpot(null);
     };
 
-    const handleSaveSpot = () => {
-        const price = pricing[formData.size];
-        if (editingSpot) {
-            setSpots((prev) =>
-                prev.map((s) =>
-                    s.id === editingSpot.id ? {...s, ...formData, pricePerHour: price} : s
-                )
-            );
-        } else {
-            const newSpot: ParkingSpot = {
-                id: Date.now().toString(),
-                ...formData,
-                pricePerHour: price,
+    const handleSaveSpot = async () => {
+        try {
+            const payload: ParkingSpotPayload = {
+                spotNumber: formData.spotNumber,
+                floor: formData.floor,
+                lotId: formData.lotId,
+                typeId: formData.typeId,
+                status: formData.status as SpotStatus,
             };
-            setSpots((prev) => [...prev, newSpot]);
+
+            if (editingSpot) {
+                await ParkingSpotService.update(editingSpot?.id, payload);
+            } else {
+                await ParkingSpotService.create(payload);
+            }
+            await fetchData();
+            handleCloseModal();
+        } catch (error) {
+            handleRequestErrors(error);
         }
-        handleCloseModal();
     };
 
-    const handleDeleteSpot = (id: string) => {
-        if (confirm("Are you sure you want to delete this spot?")) {
-            setSpots((prev) => prev.filter((s) => s.id !== id));
+
+    const handleDeleteClick = (spot: ParkingSpot) => {
+        setSelectedSpot(spot);
+        setIsDeleteModalOpen(true);
+    };
+
+    const handleCloseDeleteModal = () => {
+        setIsDeleteModalOpen(false);
+        setSelectedSpot(null);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!selectedSpot) return;
+
+        try {
+            setLoading(true);
+            await ParkingSpotService.remove(selectedSpot.id);
+            setSpots((prev) => prev.filter((s) => s.id !== selectedSpot.id));
+            await fetchData();
+        } catch (error) {
+            handleRequestErrors(error);
+        } finally {
+            setSelectedSpot(null);
+            setLoading(false);
         }
     };
 
-    const handleToggleMaintenance = (id: string) => {
-        setSpots((prev) =>
-            prev.map((s) =>
-                s.id === id
-                    ? {...s, status: s.status === "maintenance" ? "available" : "maintenance"}
-                    : s
-            )
-        );
+    const handleToggleMaintenance = async (id: string) => {
+        const targetSpot = spots.find((s) => s.id === id);
+        if (!targetSpot) return;
+        const nextStatus = targetSpot.status === "maintenance" ? "available" : "maintenance";
+
+        try {
+            await ParkingSpotService.updateStatus(id, nextStatus);
+            await fetchData();
+        } catch (error) {
+            handleRequestErrors(error);
+        }
     };
 
-    const handleUpdatePricing = (size: VehicleSize, value: number) => {
-        setPricing((prev) => ({...prev, [size]: value}));
-        setSpots((prev) =>
-            prev.map((spot) => (spot.size === size ? {...spot, pricePerHour: value} : spot))
+    const currentSelectedCategory = categories.find((c) => c.id === formData.typeId);
+    const displayedHourlyRate = currentSelectedCategory ? currentSelectedCategory.baseHourlyRate : 0;
+
+    if (loading) {
+        return (
+            <AdminSidebar>
+                <div className="min-h-screen flex items-center justify-center bg-gray-50">
+                    <p className="text-gray-500 font-medium animate-pulse">Loading spot topology stats...</p>
+                </div>
+            </AdminSidebar>
         );
-    };
+    }
+    ;
+
 
     const StatCard = ({
                           label,
@@ -135,9 +225,9 @@ export default function ParkingSpotsConfig() {
         color: "gray" | "green" | "blue" | "orange";
     }) => {
         const gradients = {
-            gray: "from-gray-500 to-gray-600",
+            gray: "from-gray-700 to-gray-800",
             green: "from-emerald-500 to-green-600",
-            blue: "from-blue-500 to-indigo-600",
+            blue: "from-blue-900 to-indigo-600",
             orange: "from-amber-500 to-orange-600",
         };
         return (
@@ -177,10 +267,10 @@ export default function ParkingSpotsConfig() {
 
                 <div className="p-8">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-5 mb-8">
-                        <StatCard label="Total Spots" value={totalSpots} color="gray"/>
-                        <StatCard label="Available" value={availableSpots} color="green"/>
-                        <StatCard label="Occupied" value={occupiedSpots} color="blue"/>
-                        <StatCard label="Maintenance" value={maintenanceSpots} color="orange"/>
+                        <StatCard label="Total Spots" value={stats.totalSpots} color="gray"/>
+                        <StatCard label="Available" value={stats.availableSpots} color="green"/>
+                        <StatCard label="Occupied" value={stats.occupiedSpots} color="blue"/>
+                        <StatCard label="Maintenance" value={stats.maintenanceSpots} color="orange"/>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-4 mb-6">
@@ -232,17 +322,26 @@ export default function ParkingSpotsConfig() {
                             <p className="text-gray-500">Try adjusting your filters or add a new spot.</p>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                            {filteredSpots.map((spot) => (
-                                <SpotCard
-                                    key={spot.id}
-                                    spot={spot}
-                                    onEdit={handleOpenModal}
-                                    onDelete={handleDeleteSpot}
-                                    onToggleMaintenance={handleToggleMaintenance}
-                                />
-                            ))}
-                        </div>
+                        <>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                                {filteredSpots.map((spot: ParkingSpot) => (
+                                    <SpotCard
+                                        key={spot.id}
+                                        spot={spot}
+                                        onEdit={handleOpenModal}
+                                        onDelete={handleDeleteClick}
+                                        onToggleMaintenance={handleToggleMaintenance}
+                                    />
+                                ))}
+                            </div>
+                            <Pagination
+                                currentPage={page}
+                                totalPages={meta.totalPages}
+                                totalItems={meta.total}
+                                pageSize={meta.pageSize}
+                                onPageChange={(targetPage) => setPage(targetPage)}
+                            />
+                        </>
                     )}
                 </div>
 
@@ -274,18 +373,35 @@ export default function ParkingSpotsConfig() {
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Vehicle Size
+                                        Floor Level
+                                    </label>
+                                    <input
+                                        type="number"
+                                        value={formData.floor}
+                                        onChange={(e) =>
+                                            setFormData({...formData, floor: parseInt(e.target.value) || 1})
+                                        }
+                                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        required
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Spot Category Type (Linked Rates)
                                     </label>
                                     <select
-                                        value={formData.size}
+                                        value={formData.typeId}
                                         onChange={(e) =>
-                                            setFormData({...formData, size: e.target.value as VehicleSize})
+                                            setFormData({...formData, typeId: e.target.value})
                                         }
                                         className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
                                     >
-                                        <option value="small">Small (Motorcycle)</option>
-                                        <option value="medium">Medium (Car)</option>
-                                        <option value="large">Large (Truck/Van)</option>
+                                        {categories.map((category) => (
+                                            <option key={category.id} value={category.id}>
+                                                {category.name} ({category.size})
+                                            </option>
+                                        ))}
                                     </select>
                                 </div>
 
@@ -308,11 +424,12 @@ export default function ParkingSpotsConfig() {
                                     <p className="text-sm text-gray-600">
                                         Hourly rate for this spot:{" "}
                                         <span className="font-bold text-gray-800">
-                    ${pricing[formData.size].toFixed(2)}
-                  </span>
+                                            ${Number(displayedHourlyRate).toFixed(2)}
+                                        </span>
                                     </p>
                                     <p className="text-xs text-gray-500 mt-1">
-                                        Rate is determined by vehicle size. Change it in the price configuration panel.
+                                        Rate is determined dynamically by the database configuration for this category
+                                        structural mapping.
                                     </p>
                                 </div>
                             </div>
@@ -335,6 +452,22 @@ export default function ParkingSpotsConfig() {
                             </div>
                         </div>
                     </div>
+                )}
+
+                {isDeleteModalOpen && selectedSpot && (
+                    <AdminActionModal
+                        isOpen={isDeleteModalOpen && !!selectedSpot}
+                        onClose={handleCloseDeleteModal}
+                        onConfirm={handleConfirmDelete}
+                        variant="danger"
+                        title="Delete Parking Spot"
+                        confirmLabel="Confirm Delete"
+                        description={
+                            <span>Are you sure you want to delete parking spot {selectedSpot?.spotNumber}?
+                            <span className="font-semibold text-gray-800">
+                            </span>{" "}on Floor {selectedSpot?.floor}? This layout alteration cannot be undone.</span>
+                        }
+                    />
                 )}
             </div>
         </AdminSidebar>

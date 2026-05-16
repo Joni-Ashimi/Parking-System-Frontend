@@ -1,4 +1,4 @@
-import { Bounce, toast } from 'react-toastify';
+import {Bounce, toast} from 'react-toastify';
 import axios from 'axios';
 import {ApiError} from "@/utils/types/ApiResponse";
 
@@ -76,6 +76,10 @@ export const showWarning = (message: string, timeout = 2000) => {
 export const handleRequestErrors = (err: unknown) => {
     if (axios.isAxiosError<ApiError>(err) && err.response?.data) {
         showError(err.response.data.message);
+    } else if (typeof err === "string") {
+        showError(err);
+    } else if (err instanceof Error) {
+        showError(err.message);
     } else {
         showError('Something went wrong!');
     }

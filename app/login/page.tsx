@@ -7,7 +7,7 @@ import {useRouter} from "next/navigation";
 import GradientButton from "@/components/core/buttons/GradientButton";
 import CEmailInput from "@/components/core/inputs/CEmailInput";
 import CPasswordInput from "@/components/core/inputs/CPasswordInput";
-import { handleRequestErrors } from '@/utils/functions';
+import {handleRequestErrors, showSuccess} from '@/utils/functions';
 import {hideLoader, showLoader} from "@/store/loadingSlice";
 import {loginSucces} from "@/store/auth/authSlice";
 import {AppDispatch, RootState} from "@/store/store";
@@ -29,6 +29,7 @@ export default function LoginPage() {
             const response = await AuthService.login(email, password);
             const { user, accessToken, refreshToken } = response.data;
             dispatch(loginSucces({ user, accessToken, refreshToken }));
+            showSuccess(`Welcome back, ${user.name}!`);
             router.push("/user/dashboard");
         } catch (err) {
             handleRequestErrors(err);

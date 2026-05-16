@@ -1,18 +1,23 @@
 import API from '../utils/API/API';
 
-const ParkingSpotStatus = ['AVAILABLE', 'OCCUPIED', 'MAINTENANCE'] as const;
-const ParkingSpotService = {
-    create: (data: {
-        spotNumber: string;
-        floor: number;
-        lotId: string;
-        status: typeof ParkingSpotStatus[number];
-    }) => API.post('/parking-spots', data),
+export const ParkingSpotStatus = ['available', 'occupied', 'maintenance', 'reserved'] as const;
+export type ParkingSpotStatusType = (typeof ParkingSpotStatus)[number];
 
-    findAll: (lotId?: string) =>
-        API.get('/parking-spots', {
-            params: {lotId},
-        }),
+export interface ParkingSpotPayload {
+    spotNumber: string;
+    floor: number;
+    lotId: string;
+    typeId: string;
+    status: ParkingSpotStatusType;
+}
+
+const ParkingSpotService = {
+    create: (data: ParkingSpotPayload) => API.post('/parking-spots', data),
+
+    findAll: (params?: { lotId?: string; page?: number; pageSize?: number; qs?: string }) =>
+        API.get('/parking-spots', {params}),
+
+    getStats: () => API.get(`/parking-spots/stats`),
 
     findAvailable: (lotId?: string) =>
         API.get('/parking-spots/available', {
@@ -22,10 +27,9 @@ const ParkingSpotService = {
     findOne: (id: string) =>
         API.get(`/parking-spots/${id}`),
 
-    update: (id: string, data: any) =>
-        API.patch(`/parking-spots/${id}`, data),
+    update: (id: string, data: Partial<ParkingSpotPayload>) => API.patch(`/parking-spots/${id}`, data),
 
-    updateStatus: (id: string, status: typeof ParkingSpotStatus[number]) =>
+    updateStatus: (id: string, status: ParkingSpotStatusType) =>
         API.patch(`/parking-spots/${id}/status`, {status}),
 
     remove: (id: string) =>
