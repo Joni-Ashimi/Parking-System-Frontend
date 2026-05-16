@@ -9,6 +9,7 @@ import {
     Menu,
     ParkingSquare, User,
 } from "lucide-react";
+import Header from "@/hoc/layout/partials/Header";
 
 export default function UserSidebar({ children} : { children: React.ReactNode}) {
     const [isOpen, setIsOpen] = useState(true);
@@ -49,7 +50,6 @@ export default function UserSidebar({ children} : { children: React.ReactNode}) 
                         </button>
                     </div>
 
-                    {/* Navigation */}
                     <nav className="space-y-1">
                         <NavItem icon={<LayoutDashboard size={18} />} label="Dashboard" href="/user/dashboard" isOpen={isOpen} />
                         <NavItem icon={<Car size={18} />} label="My Vehicles" href="/user/my-vehicles" isOpen={isOpen} />
@@ -60,8 +60,11 @@ export default function UserSidebar({ children} : { children: React.ReactNode}) 
             </div>
 
             {/* CONTENT */}
-            <div className={`transition-all duration-300 ${isOpen ? "ml-64" : "ml-20"}`}>
-                {children}
+            <div className={`transition-all duration-300 flex flex-col min-h-screen ${isOpen ? "ml-64" : "ml-24"}`}>
+                <Header />
+                <main className="flex-1">
+                    {children}
+                </main>
             </div>
         </>
     );

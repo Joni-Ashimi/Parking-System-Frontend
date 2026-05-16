@@ -1,129 +1,88 @@
-'use client';
-import Link from 'next/link';
-import { FaSearch, FaGavel, FaUser } from 'react-icons/fa';
-import { usePathname, useRouter } from 'next/navigation';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '@/store/store';
-import { logOut } from '@/store/auth/authSlice';
-import { showLoader } from '@/store/loadingSlice';
-import GradientButton from "@/components/core/buttons/GradientButton";
+"use client";
+
+import React from "react";
+import {usePathname, useRouter} from "next/navigation";
+import {useDispatch, useSelector} from "react-redux";
+import {RootState} from "@/store/store";
+import {logOut} from "@/store/auth/authSlice";
+import {LogIn, LogOut, ParkingSquare, User, UserPlus} from "lucide-react";
+import Link from "next/link";
 
 export default function Header() {
-    const router = useRouter();
     const pathname = usePathname();
+    const router = useRouter();
     const dispatch = useDispatch();
-    const user = useSelector((state: RootState) => state.auth.user);
-    const accessToken = useSelector((state: RootState) => state.auth.accessToken);
-    const isLoggedIn = !!accessToken && !!user;
+    const {user} = useSelector((state: RootState) => state.auth);
 
-    const handleLogOut = () => {
+    const handleLogoutClick = () => {
         dispatch(logOut());
-        router.push('/');
+        router.push("/login");
     };
 
-    const handleLoginClick = async (e: React.MouseEvent) => {
-        e.preventDefault();
-        if (pathname !== "/login") {
-            dispatch(showLoader("Loading Login Page..."));
-            router.push("/login")}
-    };
-
-    const handleSignUpClick = async (e: React.MouseEvent) => {
-        e.preventDefault();
-        if (pathname !== "/register") {
-            dispatch(showLoader("Loading Signup Page..."));
-            router.push("/register")
-        }
-    }
-
-    const getAuctionsClick = async (e: React.MouseEvent) => {
-        e.preventDefault();
-        if (pathname !== "/auctions") {
-            dispatch(showLoader("Loading Auctions Page..."));
-            router.push("/auctions")
-        }
-    }
-
-    const sellClick = async (e: React.MouseEvent) => {
-        e.preventDefault();
-        if (pathname !== "/sell") {
-            dispatch(showLoader("Loading Sell Page..."));
-            router.push("/sell")
-        }
-    }
+    const isAdmin = pathname.startsWith("/admin");
+    const isHome = pathname === "/";
 
     return (
-        <header className="bg-white shadow-md">
-            <div className="container mx-auto px-4 py-3">
-                <div className="flex items-center justify-between">
-                    <Link href="/" className="flex items-center space-x-2">
-                        <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-blue-500 rounded-lg flex items-center justify-center">
-                            <FaGavel className="text-white text-lg" />
+        <header
+            className={`w-full bg-white border-b border-gray-200 px-8 flex items-center sticky top-0 z-50 shadow-sm ${
+                isHome ? "justify-between" : "justify-end"
+            }`}
+            style={{
+                height: isAdmin ? "80px" : "64px",
+                minHeight: isAdmin ? "80px" : "64px"
+            }}
+        >
+            {isHome && (
+                <Link href="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
+                    <ParkingSquare className="w-6 h-6 text-blue-600 flex-shrink-0"/>
+                    <span className="font-semibold text-gray-800 tracking-tight">
+                        Prometrix
+                    </span>
+                </Link>
+            )}
+            <div className="flex items-center gap-4">
+                {user ? (
+                    <>
+                        <div
+                            className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
+                            <div
+                                className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold uppercase">
+                                {user.name?.charAt(0) || <User size={12}/>}
+                            </div>
+                            <span className="text-sm font-medium text-slate-700 max-w-[120px] truncate">
+                        {user.name}
+                    </span>
                         </div>
-                        <span className="text-xl font-bold text-gray-800">Auction</span>
-                    </Link>
 
-                    <nav className="hidden md:flex space-x-6">
-                        <Link href="/auctions" className="text-gray-600 hover:text-purple-600 font-medium" onClick={getAuctionsClick}>
-                            Auctions
-                        </Link>
-                        <Link href="/sell" className="text-gray-600 hover:text-purple-600 font-medium" onClick={sellClick}>
-                            Sell
-                        </Link>
-                    </nav>
-
-
-
-                    <div className="flex items-center space-x-4">
-                        {!isLoggedIn ? (
-                            <>
-                                <Link
-                                    href="#"
-                                    onClick={handleSignUpClick}
-                                    className="bg-gradient-to-r from-purple-600 to-blue-500 text-white px-4 py-2 rounded-lg font-medium flex items-center space-x-2">
-                                    <FaUser className="text-sm" />
-                                    <span>Sign Up</span>
-                                </Link>
-
-                                <Link
-                                    href="#"
-                                    onClick={handleLoginClick}
-                                    className="bg-gradient-to-r from-purple-600 to-blue-500 text-white px-4 py-2 rounded-lg font-medium flex items-center space-x-2"
-                                >
-                                    <FaUser className="text-sm" />
-                                    <span>Log In</span>
-                                </Link>
-
-                            </>
-                        ) : (
-                            <GradientButton
-                                onClick={handleLogOut}
-                                fromColor="from-purple-600"
-                                toColor="to-blue-500"
-                                hoverFromColor="hover:from-purple-700"
-                                hoverToColor="hover:to-blue-600"
-                                className="text-white px-4 py-2 rounded-lg font-medium flex items-center space-x-2"
-                                label={
-                                    <span className="flex items-center space-x-2">
-                    <FaUser className="text-sm" />
-                    <span>Log Out</span>
-                  </span>
-                                }
-                            />
-                        )}
-                    </div>
-                </div>
-
-                <div className="mt-4 md:hidden">
-                    <div className="relative">
-                        <input
-                            type="text"
-                            placeholder="Search auctions..."
-                            className="w-full py-2 px-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                        />
-                        <FaSearch className="absolute right-3 top-3 text-gray-400" />
-                    </div>
-                </div>
+                        <button
+                            type="button"
+                            onClick={handleLogoutClick}
+                            className="inline-flex items-center gap-2 px-3.5 py-2 text-sm font-medium text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-100 rounded-lg transition-all"
+                        >
+                            <LogOut size={15}/>
+                            <span className="hidden sm:inline">Log Out</span>
+                        </button>
+                    </>
+                ) : (
+                    isHome && (
+                        <div className="flex items-center gap-2">
+                            <Link
+                                href="/login"
+                                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 border border-transparent rounded-lg transition-colors"
+                            >
+                                <LogIn size={15} className="text-slate-500"/>
+                                Sign In
+                            </Link>
+                            <Link
+                                href="/register"
+                                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 shadow-sm rounded-lg transition-colors"
+                            >
+                                <UserPlus size={15}/>
+                                Sign Up
+                            </Link>
+                        </div>
+                    )
+                )}
             </div>
         </header>
     );

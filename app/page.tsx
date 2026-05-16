@@ -1,43 +1,17 @@
 import Link from "next/link";
-import {ParkingCircle, Zap,} from "lucide-react";
+import {Zap,} from "lucide-react";
 import Hero from "@/components/sections/Hero";
 import FeaturesSection from "@/components/sections/FeaturesSection";
 import StepsSection from "@/components/sections/StepsSection";
 import VehiclesSection from "@/components/sections/VehiclesSection";
 import Reviews from "@/components/sections/Reviews";
+import Header from "@/hoc/layout/partials/Header";
 
 export default function Home() {
 
     return (
         <div className="min-h-screen overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-gray-900">
-            <nav className="px-6 py-4 bg-black/40 backdrop-blur-xl border-b border-white/10 sticky top-0 z-50">
-                <div className="max-w-7xl mx-auto flex justify-between items-center">
-                    <div className="flex items-center gap-2 group cursor-pointer">
-                        <ParkingCircle
-                            className="w-8 h-8 text-blue-400 group-hover:scale-110 transition-transform duration-300"/>
-                        <span
-                            className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-              Prometrix
-            </span>
-                    </div>
-
-                    <div className="flex gap-4 items-center">
-                        <Link
-                            href="/login"
-                            className="text-gray-300 hover:text-white transition-all duration-300 hover:scale-105"
-                        >
-                            Login
-                        </Link>
-                        <Link
-                            href="/register"
-                            className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-blue-500/25"
-                        >
-                            Sign Up
-                        </Link>
-                    </div>
-                </div>
-            </nav>
-
+            <Header/>
             <Hero/>
             <FeaturesSection/>
             <VehiclesSection/>
