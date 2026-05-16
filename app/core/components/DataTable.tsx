@@ -29,7 +29,13 @@ interface TableRecord {
 interface DataTableProps<T> {
     columns: TableColumnsType<T>;
     data: T[];
-    getData: (tableParams: TableParams) => void;
+    getData: (tableParams: {
+        page: number | undefined;
+        pageSize: number | undefined;
+        qs: string;
+        sortBy: string | undefined;
+        sortOrder: "ASC" | "DESC" | undefined
+    }) => void;
     defaultPage?: number;
     defaultPageSize?: number;
     pageSizeOptions?: Array<number>;
@@ -72,9 +78,19 @@ const CustomTable = <T extends TableRecord>({
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
+    const [sortBy, setSortBy] = useState<string | undefined>(undefined);
+    const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC' | undefined>(undefined);
+
     const onChange: TableProps<T>['onChange'] = (pagination, filters, sorter, extra) => {
         setPage(pagination.current || defaultPage);
         setPageSize(Number(pagination.pageSize) || defaultPageSize);
+        if (sorter && !Array.isArray(sorter) && sorter.columnKey) {
+            setSortBy(sorter.columnKey as string);
+            setSortOrder(sorter.order === 'ascend' ? 'ASC' : sorter.order === 'descend' ? 'DESC' : undefined);
+        } else {
+            setSortBy(undefined);
+            setSortOrder(undefined);
+        }
     };
 
     const rowSelection: TableProps<T>['rowSelection'] = !!selectionType
@@ -102,9 +118,9 @@ const CustomTable = <T extends TableRecord>({
 
     useEffect(() => {
         setIsLoading(true);
-        getData({page, pageSize, qs: searchTerm});
+        getData({page, pageSize, qs: searchTerm, sortBy, sortOrder});
         setIsLoading(false);
-    }, [page, pageSize, searchTerm, ...extraDependencies]);
+    }, [page, pageSize, searchTerm, sortBy, sortOrder, ...extraDependencies]);
 
     const handleRowClick = (record: T) => {
         setSelectedRowKeys([record.id]);

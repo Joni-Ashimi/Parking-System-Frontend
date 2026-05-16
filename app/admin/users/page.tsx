@@ -1,50 +1,51 @@
 "use client";
-import {useCallback, useState} from "react";
-import {Eye, Shield, TrendingUp, UserCheck, Users, UserX,} from "lucide-react";
+import {useCallback, useEffect, useState} from "react";
+import {Eye, Shield, Trash2, TrendingUp, UserCheck, Users, UserX,} from "lucide-react";
 import type {TableColumnsType} from "antd";
 import AdminSidebar from "@/components/sidebar/adminSidebar";
 import DataTable from "@/app/core/components/DataTable";
-import API from "@/utils/API/API";
 import UserService from "@/services/UserService";
-import {formatDate, safePercent} from "@/utils/functions";
-
-interface User {
-    id: string;
-    name: string;
-    email: string;
-    phone: string;
-    profileImageUrl: string;
-    lastLoginAt: string;
-    verificationStatus: string;
-}
+import {formatDate, handleRequestErrors, safePercent} from "@/utils/functions";
+import AdminActionModal from "@/app/admin/AdminActionModal";
+import AdminUserViewModal, {User} from "@/components/admin/UserViewModal";
 
 interface TableParams {
-    page: number;
-    pageSize: number;
-    qs: string;
+    page?: number;
+    pageSize?: number;
+    qs?: string;
+    sortBy?: string;
+    sortOrder?: "ASC" | "DESC"
+}
+
+interface GlobalStats {
+    total: number;
+    verified: number;
+    pending: number;
+    banned: number;
 }
 
 function ActionMenu({
                         user,
-                        onStatusChange,
+                        onInitiateAction,
+                        onViewProfile,
                     }: {
     user: User;
-    onStatusChange: (id: string, status: "verified" | "banned" | 'pending') => void;
+    onInitiateAction: (user: User, actionType: "verified" | "banned" | "delete") => void;
+    onViewProfile: (user: User) => void;
 }) {
     return (
         <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
-
             <button
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-indigo-200 text-indigo-600 hover:bg-indigo-50 hover:border-indigo-400 transition-all">
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-indigo-200 text-indigo-600 hover:bg-indigo-50 hover:border-indigo-400 transition-all"
+                onClick={() => onViewProfile(user)}
+            >
                 <Eye size={13}/>
                 View
             </button>
 
             {user.verificationStatus === "verified" ? (
                 <button
-                    onClick={() => {
-                        if (confirm("Ban this user?")) onStatusChange(user.id, "banned");
-                    }}
+                    onClick={() => onInitiateAction(user, "banned")}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-rose-200 text-rose-500 hover:bg-rose-50 hover:border-rose-400 transition-all"
                 >
                     <UserX size={13}/>
@@ -52,15 +53,22 @@ function ActionMenu({
                 </button>
             ) : (
                 <button
-                    onClick={() => {
-                        if (confirm("Activate this user?")) onStatusChange(user.id, "verified");
-                    }}
+                    onClick={() => onInitiateAction(user, "verified")}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-emerald-200 text-emerald-600 hover:bg-emerald-50 hover:border-emerald-400 transition-all"
                 >
                     <UserCheck size={13}/>
                     Activate
                 </button>
             )}
+            <button
+                type="button"
+                onClick={() => onInitiateAction(user, "delete")}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-all"
+                title="Soft Delete User"
+            >
+                <Trash2 size={13}/>
+                Delete
+            </button>
         </div>
     );
 }
@@ -68,44 +76,78 @@ function ActionMenu({
 export default function AdminUsersPage() {
     const [users, setUsers] = useState<User[]>([]);
     const [total, setTotal] = useState(0);
+    const [globalStats, setGlobalStats] = useState<GlobalStats>({total: 0, verified: 0, pending: 0, banned: 0});
 
-    const getData = useCallback(async (params: TableParams) => {
-        const {page = 1, pageSize = 10, qs = ""} = params;
+    const [targetUser, setTargetUser] = useState<User | null>(null);
+    const [activeModal, setActiveModal] = useState<"view" | "action" | null>(null);
+    const [pendingAction, setPendingAction] = useState<"verified" | "banned" | "delete" | null>(null);
 
+    const fetchStats = useCallback(async () => {
         try {
-            const res = await API.get("/users", {
-                params: {
-                    page,
-                    pageSize,
-                    qs,
-                },
-            });
-
-            const {data, total} = res.data;
-            setUsers(data);
-            setTotal(total);
+            const stats = await UserService.getUsersStats();
+            setGlobalStats(stats.data);
         } catch (err) {
-            console.error("Failed to fetch users:", err);
+            handleRequestErrors(err);
         }
     }, []);
 
-    const handleStatusChange = async (
-        userId: string,
-        newStatus: "verified" | "banned" | 'pending'
-    ) => {
+    const getData = useCallback(async (params: TableParams) => {
+        const {page = 1, pageSize = 10, qs = "", sortBy, sortOrder} = params;
         try {
-            if (newStatus === "verified") {
-                await UserService.activateUser(userId);
-            } else {
-                await UserService.banUser(userId);
+            const res = await UserService.getAll({page, pageSize, qs, sortBy, sortOrder} as any);
+            const {data, total: responseTotal} = res.data;
+            setUsers(data);
+            setTotal(responseTotal);
+        } catch (err) {
+            handleRequestErrors(err);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchStats();
+    }, [fetchStats]);
+
+    const handleOpenActionModal = (user: User, actionType: "verified" | "banned" | "delete") => {
+        setTargetUser(user);
+        setPendingAction(actionType);
+        setActiveModal("action");
+    };
+
+    const handleOpenViewModal = (user: User) => {
+        setTargetUser(user);
+        setActiveModal("view");
+    };
+
+    const handleCloseActionModal = () => {
+        setTargetUser(null);
+        setPendingAction(null);
+    };
+
+    const handleCloseModals = () => {
+        setActiveModal(null);
+        setTargetUser(null);
+        setPendingAction(null);
+    };
+
+    const handleConfirmStatusChange = async () => {
+        if (!targetUser || !pendingAction) return;
+
+        try {
+            if (pendingAction === "verified") {
+                await UserService.activateUser(targetUser.id);
+            } else if (pendingAction === "banned") {
+                await UserService.banUser(targetUser.id);
+            } else if (pendingAction === "delete") {
+                await UserService.deleteUser(targetUser.id);
+                setUsers((prev) => prev.filter((u) => u.id !== targetUser.id));
             }
             setUsers((prev) =>
-                prev.map((u) =>
-                    u.id === userId ? {...u, verificationStatus: newStatus} : u
-                )
+                prev.map((u) => (u.id === targetUser.id ? {...u, verificationStatus: pendingAction} : u))
             );
+            await fetchStats();
+            handleCloseModals();
         } catch (err) {
-            console.error(err);
+            handleRequestErrors(err);
         }
     };
 
@@ -118,7 +160,12 @@ export default function AdminUsersPage() {
             render: (_, record) => (
                 <div className="flex items-center gap-3">
                     <img
-                        src={record?.profileImageUrl}
+                        src={
+                            record?.profileImageUrl ||
+                            (record?.gender === "MALE"
+                                ? "https://res.cloudinary.com/dorwowkmx/image/upload/v1778960498/male-face-avatar-icon-set-flat-design-social-media-profiles_1281173-3806_mcwkod.jpg"
+                                : "https://res.cloudinary.com/dorwowkmx/image/upload/v1778960555/avatar-profile-icon-flat-style-female-user-profile-vector-illustration-isolated-background-women-profile-sign-business-concept_157943-38866_li4tqs.jpg")
+                        }
                         alt={record.name}
                         className="w-12 h-12 rounded-full object-cover ring-2 ring-gray-100"
                     />
@@ -155,35 +202,32 @@ export default function AdminUsersPage() {
                 {text: "Banned", value: "banned"},
                 {text: "Pending", value: "pending"},
             ],
-            onFilter: (value, record) => record.verificationStatus === value,
             render: (status: User["verificationStatus"]) => {
                 switch (status) {
                     case "verified":
                         return (
                             <span
                                 className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"/>
-                    Verified
-                </span>
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"/>
+                                Verified
+                            </span>
                         );
-
                     case "pending":
                         return (
                             <span
                                 className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
-                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"/>
-                    Pending
-                </span>
+                                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"/>
+                                Pending
+                            </span>
                         );
-
                     case "banned":
                     default:
                         return (
                             <span
                                 className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-600 border border-rose-200">
-                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500"/>
-                    Banned
-                </span>
+                                <span className="w-1.5 h-1.5 rounded-full bg-rose-500"/>
+                                Banned
+                            </span>
                         );
                 }
             },
@@ -193,14 +237,14 @@ export default function AdminUsersPage() {
             key: "actions",
             align: "right",
             render: (_, record) => (
-                <ActionMenu user={record} onStatusChange={handleStatusChange}/>
+                <ActionMenu
+                    user={record}
+                    onInitiateAction={handleOpenActionModal}
+                    onViewProfile={handleOpenViewModal}
+                />
             ),
         },
     ];
-
-    const activeCount = users.filter(u => u?.verificationStatus === "verified").length;
-    const bannedCount = users.filter(u => u?.verificationStatus === "banned").length;
-    const pendingCount = users.filter(u => u?.verificationStatus === "pending").length;
 
     return (
         <AdminSidebar>
@@ -242,7 +286,7 @@ export default function AdminUsersPage() {
                             </div>
                             <div>
                                 <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Total Users</p>
-                                <p className="text-2xl font-bold text-gray-900 leading-tight">{users?.length}</p>
+                                <p className="text-2xl font-bold text-gray-900 leading-tight">{globalStats.total}</p>
                             </div>
                         </div>
                         <div
@@ -255,9 +299,10 @@ export default function AdminUsersPage() {
                                 <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Active
                                     Users</p>
                                 <div className="flex items-end gap-2">
-                                    <p className="text-2xl font-bold text-emerald-600 leading-tight">{activeCount}</p>
-                                    <span
-                                        className="text-xs text-emerald-500 font-medium mb-0.5">{safePercent(users, activeCount)}%</span>
+                                    <p className="text-2xl font-bold text-emerald-600 leading-tight">{globalStats.verified}</p>
+                                    <span className="text-xs text-emerald-500 font-medium mb-0.5">
+                                        {globalStats.total > 0 ? safePercent(globalStats.total, globalStats.verified) : 0}%
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -271,9 +316,10 @@ export default function AdminUsersPage() {
                                 <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Pending
                                     Users</p>
                                 <div className="flex items-end gap-2">
-                                    <p className="text-2xl font-bold text-amber-600 leading-tight">{pendingCount}</p>
-                                    <span
-                                        className="text-xs text-amber-700 font-medium mb-0.5">{safePercent(users, pendingCount)}%</span>
+                                    <p className="text-2xl font-bold text-amber-600 leading-tight">{globalStats.pending}</p>
+                                    <span className="text-xs text-amber-700 font-medium mb-0.5">
+                                        {safePercent(globalStats.total, globalStats.pending)}%
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -284,9 +330,10 @@ export default function AdminUsersPage() {
                                 <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Banned
                                     Users</p>
                                 <div className="flex items-end gap-2">
-                                    <p className="text-2xl font-bold text-rose-600 leading-tight">{bannedCount}</p>
-                                    <span
-                                        className="text-xs text-rose-700 font-medium mb-0.5">{safePercent(users, bannedCount)}%</span>
+                                    <p className="text-2xl font-bold text-rose-600 leading-tight">{globalStats.banned}</p>
+                                    <span className="text-xs text-rose-700 font-medium mb-0.5">
+                                        {safePercent(globalStats.total, globalStats.banned)}%
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -307,6 +354,54 @@ export default function AdminUsersPage() {
                     </div>
                 </div>
             </div>
+
+            {activeModal === 'action' && targetUser && pendingAction && (
+                <AdminActionModal
+                    isOpen={activeModal === 'action'}
+                    onClose={handleCloseActionModal}
+                    onConfirm={handleConfirmStatusChange}
+                    variant={pendingAction === "verified" ? "success" : "danger"}
+                    title={
+                        pendingAction === "delete"
+                            ? "Delete Account"
+                            : pendingAction === "banned"
+                                ? "Ban User Account"
+                                : "Activate User Account"
+                    }
+                    confirmLabel={
+                        pendingAction === "delete"
+                            ? "Confirm Delete"
+                            : pendingAction === "banned"
+                                ? "Confirm Ban"
+                                : "Activate Account"
+                    }
+                    description={
+                        pendingAction === "delete" ? (
+                            <span>
+                    Are you absolutely sure you want to delete the account record for{" "}
+                                <span
+                                    className="font-semibold text-gray-800">{targetUser.name}</span> ({targetUser.email})?
+                    Its access rights will be suspended, but references can be recovered by system engineering.
+                </span>
+                        ) : (
+                            <span>
+                    Are you sure you want to change the access permissions for{" "}
+                                <span
+                                    className="font-semibold text-gray-800">{targetUser.name}</span> ({targetUser.email})?
+                    This changes platform security credentials instantly.
+                </span>
+                        )
+                    }
+                />
+            )}
+
+            {activeModal === "view" && targetUser && (
+                <AdminUserViewModal
+                    isOpen={activeModal === "view"}
+                    onClose={handleCloseModals}
+                    user={targetUser}
+                />
+            )}
         </AdminSidebar>
     );
 }

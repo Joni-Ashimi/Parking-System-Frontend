@@ -14,8 +14,10 @@ export const formatDate = (dateString: string) => {
     return `${day}-${month}-${year}`;
 };
 
-export const safePercent = (users: any, count: number) =>
-    users.length ? Math.round((count / users.length) * 100) : 0;
+export const safePercent = (totalOrArray: any, count: number): number => {
+    const total = Array.isArray(totalOrArray) ? totalOrArray.length : Number(totalOrArray);
+    return total > 0 ? Math.round((count / total) * 100) : 0;
+};
 
 export const showSuccess = (message: string, timeout = 2000) => {
     toast.success(message, {
