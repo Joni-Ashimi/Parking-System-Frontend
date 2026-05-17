@@ -62,7 +62,7 @@ export default function SpotCard({spot, onEdit, onDelete, onToggleMaintenance}: 
     };
     const spotSize = spot?.type?.size?.toLowerCase() as keyof typeof sizeIcons || "medium";
     const SizeIcon = sizeIcons[spotSize] || Car;
-    const hourlyRate = Number(spot?.type?.baseHourlyRate || 0);
+    const hourlyRate = Number(spot?.type?.effectiveHourlyRate || 0);
     return (
         <div
             className={`
