@@ -36,6 +36,7 @@ interface SpotCategory {
     name: string;
     size: VehicleSize;
     baseHourlyRate: number;
+    effectiveHourlyRate: number;
 };
 
 export default function ParkingSpotsConfig() {
@@ -201,7 +202,7 @@ export default function ParkingSpotsConfig() {
     };
 
     const currentSelectedCategory = categories.find((c) => c.id === formData.typeId);
-    const displayedHourlyRate = currentSelectedCategory ? currentSelectedCategory.baseHourlyRate : 0;
+    const displayedHourlyRate = currentSelectedCategory ? currentSelectedCategory.effectiveHourlyRate : 0;
 
     if (loading) {
         return (
