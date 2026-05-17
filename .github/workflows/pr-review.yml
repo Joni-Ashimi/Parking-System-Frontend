@@ -2,7 +2,7 @@ name: Automated AI PR Review & Summary
 
 on:
   pull_request:
-    branches: [ back-develop, main ]
+    branches: [ front-develop, main ]
     types: [ opened, synchronize ] # Runs when opened or when new commits are pushed
 
 jobs:
