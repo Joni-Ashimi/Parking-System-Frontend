@@ -17,6 +17,8 @@ const ParkingSpotService = {
     findAll: (params?: { lotId?: string; page?: number; pageSize?: number; qs?: string }) =>
         API.get('/parking-spots', {params}),
 
+    findAllUserMap: () => API.get('/parking-spots/map-layout'),
+
     getStats: () => API.get(`/parking-spots/stats`),
 
     findAvailable: (lotId?: string) =>

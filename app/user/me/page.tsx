@@ -7,6 +7,7 @@ import {useDispatch} from "react-redux";
 import UserSidebar from "@/components/sidebar/userSidebar";
 import UserService from "@/services/UserService";
 import {logOut} from "@/store/auth/authSlice";
+import {showSuccess} from "@/utils/functions";
 
 interface UserProfile {
     id: string;
@@ -128,12 +129,17 @@ export default function ProfilePage() {
         setSavingPassword(true);
         try {
             await UserService.confirmPassword({code: verificationCode.trim(), newPassword: passwordData.new});
-            dispatch(logOut());
-            router.push("/login");
+            showSuccess('Password reset successfully! Please log in with your new password.');
+
+            setTimeout(() => {
+                dispatch(logOut());
+                router.push("/login");
+            }, 4000);
         } catch (err: any) {
             setPasswordError(err?.response?.data?.message ?? "Invalid or expired code.");
         } finally {
             setSavingPassword(false);
+            resetPasswordForm();
         }
     };
 

@@ -1,292 +1,133 @@
 "use client";
 
-import {useEffect, useState} from "react";
-import {AlertCircle, ArrowRight, Car, CheckCircle, Clock, MapPin, Users,} from "lucide-react";
+import React, {useState} from "react";
+import {ArrowRight, Car, Clock, MapPin, ShieldCheck, User} from "lucide-react";
+import UserSidebar from "@/components/sidebar/userSidebar";
 import Link from "next/link";
-import UserSideBar from "@/components/sidebar/userSidebar";
 
-const mockLotStatus = {
-    totalSpots: 60,
-    availableSpots: 12,
-    hourlyRate: 5,
-};
-
-export default function UserHomePage() {
-    const [lotStatus, setLotStatus] = useState(mockLotStatus);
-    const [currentTime, setCurrentTime] = useState(new Date());
-
-    useEffect(() => {
-        const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-        return () => clearInterval(timer);
-    }, []);
-
-    const occupancyPercentage = ((lotStatus.totalSpots - lotStatus.availableSpots) / lotStatus.totalSpots) * 100;
-    const isAlmostFull = occupancyPercentage >= 80;
-    const isFull = lotStatus.availableSpots === 0;
-
-    const getStatusConfig = () => {
-        if (isFull) {
-            return {
-                message: "Parking Full",
-                subMessage: "No spots available at the moment",
-                color: "text-red-600",
-                bg: "bg-red-50",
-                border: "border-red-200",
-                icon: AlertCircle,
-            };
-        }
-        if (isAlmostFull) {
-            return {
-                message: "Almost Full",
-                subMessage: `Only ${lotStatus.availableSpots} spots left`,
-                color: "text-amber-600",
-                bg: "bg-amber-50",
-                border: "border-amber-200",
-                icon: AlertCircle,
-            };
-        }
-        return {
-            message: "Parking Available",
-            subMessage: `${lotStatus.availableSpots} spots open`,
-            color: "text-emerald-600",
-            bg: "bg-emerald-50",
-            border: "border-emerald-200",
-            icon: CheckCircle,
-        };
-    };
-
-    const statusConfig = getStatusConfig();
-    const StatusIcon = statusConfig.icon;
+export default function UserDashboard() {
+    // Simple states for high-level numbers (mocked or fetched easily)
+    const [userFirstName, setUserFirstName] = useState("Driver");
+    const [activeSession, setActiveSession] = useState<{ spot: string; duration: string } | null>({
+        spot: "A-12",
+        duration: "1h 45m"
+    });
 
     return (
-        <>
-            <UserSideBar>
-                <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100">
-                    <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-10">
-                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                            <div className="flex justify-end">
-                                <div className="flex items-center gap-4">
-                                    <div className="text-right hidden sm:block">
-                                        <p className="text-sm text-gray-500">Current Time</p>
-                                        <p className="font-mono text-lg font-medium text-gray-800">
-                                            {currentTime.toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"})}
-                                        </p>
-                                    </div>
-                                    <Link
-                                        href="/user/sessions"
-                                        className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-colors text-sm"
-                                    >
-                                        My Sessions
-                                    </Link>
-                                </div>
+        <UserSidebar>
+            <div className="min-h-screen bg-slate-50 p-4 md:p-8 space-y-8">
+
+                {/* Welcome Banner */}
+                <header
+                    className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div>
+                        <h1 className="text-2xl font-black text-gray-900">Welcome Back, {userFirstName}!</h1>
+                        <p className="text-sm text-gray-500 mt-0.5">Quick look at your account status and parking
+                            metrics.</p>
+                    </div>
+                    <div
+                        className="flex items-center gap-2 bg-emerald-50 text-emerald-800 text-xs font-semibold px-3 py-1.5 rounded-xl border border-emerald-200 w-fit">
+                        <ShieldCheck size={16}/> Verified Account
+                    </div>
+                </header>
+
+                {/* Highlight Banner: Live Activity Tracker */}
+                {activeSession ? (
+                    <div
+                        className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-6 text-white shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="flex items-center gap-4">
+                            <div className="p-3 bg-white/10 rounded-xl backdrop-blur-md animate-pulse">
+                                <Clock size={24}/>
+                            </div>
+                            <div>
+                                <p className="text-xs text-blue-100 uppercase tracking-wider font-bold">Active Parking
+                                    Session</p>
+                                <p className="text-lg font-bold">Spot {activeSession.spot} •
+                                    Elapsed: {activeSession.duration}</p>
                             </div>
                         </div>
-                    </header>
+                        <Link href="/user/parking"
+                              className="bg-white text-blue-600 px-4 py-2 rounded-xl text-sm font-bold shadow-sm hover:bg-blue-50 transition flex items-center gap-1.5 self-start sm:self-auto">
+                            Manage Session <ArrowRight size={16}/>
+                        </Link>
+                    </div>
+                ) : (
+                    <div
+                        className="bg-white border border-dashed border-gray-300 rounded-2xl p-6 text-center text-gray-500">
+                        <p className="text-sm">You do not have any active parking sessions right now.</p>
+                        <Link href="/dashboard/map"
+                              className="inline-block mt-3 text-sm font-bold text-blue-600 hover:underline">
+                            Find and reserve a spot now →
+                        </Link>
+                    </div>
+                )}
 
-                    {/* Main Content */}
-                    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-                            {/* Left Column – Status & CTA */}
-                            <div className="space-y-8">
-                                {/* Welcome Banner */}
-                                <div>
-                                    <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-3">
-                                        Find Your Spot,{" "}
-                                        <span
-                                            className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                  Instantly
-                </span>
-                                    </h1>
-                                    <p className="text-lg text-gray-600">
-                                        Secure parking with online payment. No more circling the block.
-                                    </p>
-                                </div>
+                {/* Navigation Quick Links Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
-                                {/* Status Card */}
-                                <div
-                                    className={`rounded-2xl border-2 p-6 ${statusConfig.bg} ${statusConfig.border}`}
-                                >
-                                    <div className="flex items-start gap-4">
-                                        <div className={`p-3 rounded-xl ${statusConfig.bg}`}>
-                                            <StatusIcon size={32} className={statusConfig.color}/>
-                                        </div>
-                                        <div className="flex-1">
-                                            <h2 className={`text-2xl font-bold ${statusConfig.color}`}>
-                                                {statusConfig.message}
-                                            </h2>
-                                            <p className="text-gray-600 mt-1">{statusConfig.subMessage}</p>
-
-                                            {/* Occupancy Bar */}
-                                            <div className="mt-4">
-                                                <div className="flex justify-between text-sm mb-1">
-                                                    <span className="text-gray-600">Occupancy</span>
-                                                    <span className="font-medium text-gray-800">
-                        {lotStatus.totalSpots - lotStatus.availableSpots}/{lotStatus.totalSpots} spots
-                      </span>
-                                                </div>
-                                                <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
-                                                    <div
-                                                        className={`h-full rounded-full transition-all duration-500 ${
-                                                            isFull
-                                                                ? "bg-red-500"
-                                                                : isAlmostFull
-                                                                    ? "bg-amber-500"
-                                                                    : "bg-emerald-500"
-                                                        }`}
-                                                        style={{width: `${occupancyPercentage}%`}}
-                                                    />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* CTA Button */}
-                                <div>
-                                    <Link
-                                        href="/user/park"
-                                        className={`
-                  inline-flex items-center gap-3 px-8 py-4 rounded-xl font-semibold text-white text-lg
-                  shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200
-                  ${
-                                            isFull
-                                                ? "bg-gray-400 cursor-not-allowed pointer-events-none"
-                                                : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
-                                        }
-                `}
-                                        aria-disabled={isFull}
-                                    >
-                                        {isFull ? "No Spots Available" : "Start Parking"}
-                                        <ArrowRight size={20}/>
-                                    </Link>
-                                    {isFull && (
-                                        <p className="text-sm text-gray-500 mt-2">
-                                            Check back soon – spots may become available.
-                                        </p>
-                                    )}
-                                </div>
-
-                                {/* Quick Info */}
-                                <div className="flex flex-wrap gap-4 pt-4">
-                                    <div
-                                        className="flex items-center gap-2 bg-white rounded-xl px-4 py-3 shadow-sm border border-gray-200">
-                                        <MapPin size={18} className="text-blue-600"/>
-                                        <span className="text-sm text-gray-700">123 Main Street, City</span>
-                                    </div>
-                                    <div
-                                        className="flex items-center gap-2 bg-white rounded-xl px-4 py-3 shadow-sm border border-gray-200">
-                                        <Clock size={18} className="text-blue-600"/>
-                                        <span className="text-sm text-gray-700">24/7 Access</span>
-                                    </div>
-                                    <div
-                                        className="flex items-center gap-2 bg-white rounded-xl px-4 py-3 shadow-sm border border-gray-200">
-                                        <DollarSign size={18} className="text-blue-600"/>
-                                        <span className="text-sm text-gray-700">${lotStatus.hourlyRate}/hour</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="hidden lg:block">
-                                <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-6">
-                                    <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                                        <Car size={20} className="text-blue-600"/>
-                                        Live Parking Map
-                                    </h3>
-                                    <div className="grid grid-cols-6 gap-2">
-                                        {Array.from({length: 36}).map((_, i) => {
-                                            const isOccupied = i >= lotStatus.availableSpots;
-                                            return (
-                                                <div
-                                                    key={i}
-                                                    className={`
-                        aspect-square rounded-lg border-2 flex items-center justify-center
-                        ${isOccupied
-                                                        ? "bg-blue-100 border-blue-300"
-                                                        : "bg-green-100 border-green-300"
-                                                    }
-                      `}
-                                                >
-                                                    {isOccupied ? (
-                                                        <Car size={14} className="text-blue-600"/>
-                                                    ) : (
-                                                        <div className="w-2 h-2 rounded-full bg-green-500"/>
-                                                    )}
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                    <div className="flex items-center justify-between mt-4 text-sm">
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-3 h-3 rounded-sm bg-green-500"></div>
-                                            <span className="text-gray-600">Available</span>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-3 h-3 rounded-sm bg-blue-500"></div>
-                                            <span className="text-gray-600">Occupied</span>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <Users size={14} className="text-gray-500"/>
-                                            <span className="text-gray-600">{lotStatus.availableSpots} open</span>
-                                        </div>
-                                    </div>
-                                    <p className="text-xs text-gray-500 text-center mt-4">
-                                        Map shows real‑time availability
-                                    </p>
-                                </div>
-                            </div>
+                    {/* Card 1: Map Layout */}
+                    <Link href="/user/park"
+                          className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition group">
+                        <div
+                            className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mb-4 group-hover:bg-blue-600 group-hover:text-white transition">
+                            <MapPin size={20}/>
                         </div>
+                        <h3 className="font-bold text-gray-800 flex items-center gap-1">
+                            Parking Grid <ArrowRight size={14}
+                                                     className="opacity-0 group-hover:opacity-100 transition-all transform group-hover:translate-x-0.5"/>
+                        </h3>
+                        <p className="text-xs text-gray-400 mt-1">View the live terminal layout and reserve spaces
+                            visually.</p>
+                    </Link>
 
-                        <div className="mt-16">
-                            <h3 className="text-xl font-semibold text-gray-800 mb-4">Recent Activity</h3>
-                            <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-                                <div className="space-y-3">
-                                    <ActivityItem user="You" action="parked" time="2 hours ago"/>
-                                    <ActivityItem user="Sarah" action="checked out" time="1 hour ago"/>
-                                    <ActivityItem user="Mike" action="started parking" time="30 minutes ago"/>
-                                </div>
-                            </div>
+                    {/* Card 2: Vehicles */}
+                    <Link href="/user/my-vehicles"
+                          className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition group">
+                        <div
+                            className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center mb-4 group-hover:bg-emerald-600 group-hover:text-white transition">
+                            <Car size={20}/>
                         </div>
-                    </main>
-                </div>
-            </UserSideBar>
-        </>
-    );
-}
+                        <h3 className="font-bold text-gray-800 flex items-center gap-1">
+                            My Garage <ArrowRight size={14}
+                                                  className="opacity-0 group-hover:opacity-100 transition-all transform group-hover:translate-x-0.5"/>
+                        </h3>
+                        <p className="text-xs text-gray-400 mt-1">Manage your license plates and authorized sizing
+                            profiles.</p>
+                    </Link>
 
-function ActivityItem({user, action, time}: { user: string; action: string; time: string }) {
-    return (
-        <div className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
-            <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                    <Users size={14} className="text-gray-600"/>
+                    {/* Card 3: Sessions Placeholder */}
+                    <Link href="/dashboard/sessions"
+                          className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition group">
+                        <div
+                            className="w-10 h-10 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center mb-4 group-hover:bg-amber-600 group-hover:text-white transition">
+                            <Clock size={20}/>
+                        </div>
+                        <h3 className="font-bold text-gray-800 flex items-center gap-1">
+                            History & Sessions <ArrowRight size={14}
+                                                           className="opacity-0 group-hover:opacity-100 transition-all transform group-hover:translate-x-0.5"/>
+                        </h3>
+                        <p className="text-xs text-gray-400 mt-1">Track active status trackers, total pricing, and
+                            logs.</p>
+                    </Link>
+
+                    {/* Card 4: Profile Placeholder */}
+                    <Link href="/user/me"
+                          className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition group">
+                        <div
+                            className="w-10 h-10 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center mb-4 group-hover:bg-purple-600 group-hover:text-white transition">
+                            <User size={20}/>
+                        </div>
+                        <h3 className="font-bold text-gray-800 flex items-center gap-1">
+                            Account Settings <ArrowRight size={14}
+                                                         className="opacity-0 group-hover:opacity-100 transition-all transform group-hover:translate-x-0.5"/>
+                        </h3>
+                        <p className="text-xs text-gray-400 mt-1">Update your security flags, user credentials, and
+                            info.</p>
+                    </Link>
+
                 </div>
-                <div>
-                    <p className="text-sm font-medium text-gray-800">
-                        {user} <span className="text-gray-500">{action}</span>
-                    </p>
-                </div>
+
             </div>
-            <span className="text-xs text-gray-400">{time}</span>
-        </div>
-    );
-}
-
-function DollarSign({size, className}: { size: number; className?: string }) {
-    return (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width={size}
-            height={size}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className={className}
-        >
-            <line x1="12" y1="1" x2="12" y2="23"/>
-            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-        </svg>
+        </UserSidebar>
     );
 }

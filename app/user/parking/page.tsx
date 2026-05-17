@@ -1,178 +1,182 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import {
-    Car,
-    Clock,
-    MapPin,
-    DollarSign,
-    ArrowLeft,
-    Square,
-    Timer,
-    Shield,
-    ChevronRight,
-} from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Clock, DollarSign, MapPin, Calendar, Loader2, AlertTriangle, ArrowRight } from "lucide-react";
+import UserSidebar from "@/components/sidebar/userSidebar";
 import Link from "next/link";
+import { handleRequestErrors } from "@/utils/functions";
 
-// Mock session data – replace with real data from API/state
-const sessionData = {
-    spot: "A12",
-    vehiclePlate: "ABC-1234",
-    startTime: new Date(Date.now() - 15 * 60 * 1000), // 15 mins ago for demo
-    ratePerHour: 5.0,
-};
+interface ActiveSessionData {
+    sessionId: string;
+    spotNumber: string;
+    floor: number;
+    startedAt: string;
+    baseHourlyRate: number;
+}
 
-export default function ActiveSessionPage() {
-    const [elapsed, setElapsed] = useState(0); // in seconds
-    const [cost, setCost] = useState(0);
-    const [showEndConfirm, setShowEndConfirm] = useState(false);
-
-    const update = useCallback(() => {
-        const now = new Date();
-        const diffSeconds = Math.floor((now.getTime() - sessionData.startTime.getTime()) / 1000);
-        setElapsed(diffSeconds);
-        const hours = diffSeconds / 3600;
-        setCost(hours * sessionData.ratePerHour);
-    }, []);
+export default function UserSessionPage() {
+    const [session, setSession] = useState<ActiveSessionData | null>({
+        sessionId: "sess_89432",
+        spotNumber: "A-12",
+        floor: 1,
+        startedAt: new Date(Date.now() - 105 * 60 * 1000).toISOString(),
+        baseHourlyRate: 2.50,
+    });
+    const [loading, setLoading] = useState(false);
+    const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
     useEffect(() => {
-        update();
-        const interval = setInterval(update, 1000);
+        if (!session) return;
+        const calculateElapsed = () => {
+            const start = new Date(session.startedAt).getTime();
+            const now = new Date().getTime();
+            setElapsedSeconds(Math.max(0, Math.floor((now - start) / 1000)));
+        };
+        calculateElapsed();
+        const interval = setInterval(calculateElapsed, 1000);
         return () => clearInterval(interval);
-    }, [update]);
+    }, [session]);
 
     const formatTime = (totalSeconds: number) => {
-        const h = Math.floor(totalSeconds / 3600);
-        const m = Math.floor((totalSeconds % 3600) / 60);
-        const s = totalSeconds % 60;
-        return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
     };
 
-    const handleEndParking = () => {
-        alert(`Parking ended. Total: $${cost.toFixed(2)}`);
+    const currentCost = session
+        ? ((elapsedSeconds / 3600) * session.baseHourlyRate).toFixed(2)
+        : "0.00";
+
+    const handleEndSession = async () => {
+        if (!window.confirm("Are you sure you want to end your parking session?")) return;
+        try {
+            setLoading(true);
+            // await SessionService.endActive(session.sessionId);
+            alert(`Session for spot ${session?.spotNumber} terminated successfully!`);
+            setSession(null);
+        } catch (err) {
+            handleRequestErrors(err);
+        } finally {
+            setLoading(false);
+        }
     };
+
+    if (loading) {
+        return (
+            <UserSidebar>
+                <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50">
+                    <Loader2 className="w-8 h-8 text-blue-600 animate-spin mb-3" />
+                    <p className="text-sm text-gray-600 font-medium">Processing your session…</p>
+                </div>
+            </UserSidebar>
+        );
+    }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-950 via-slate-900 to-black text-white relative overflow-hidden">
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-blue-600/20 rounded-full blur-3xl" />
-                <div className="absolute bottom-[-10%] right-[-5%] w-[500px] h-[500px] bg-purple-600/20 rounded-full blur-3xl" />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-indigo-600/5 rounded-full blur-3xl" />
-            </div>
+        <UserSidebar>
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30 p-4 md:p-8 max-w-4xl mx-auto space-y-6">
 
-            <header className="relative z-10 backdrop-blur-md bg-black/30 border-b border-white/10">
-                <div className="max-w-4xl mx-auto px-6 py-5 flex items-center justify-between">
-                    <Link
-                        href="/user/dashboard"
-                        className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
-                    >
-                        <ArrowLeft size={20} />
-                        <span className="text-sm font-medium">Back</span>
-                    </Link>
-                    <div className="flex items-center gap-2">
-                        <Shield size={16} className="text-emerald-400" />
-                        <span className="text-sm text-emerald-400 font-medium">Live Session</span>
-                    </div>
-                </div>
-            </header>
-
-            <main className="relative z-10 max-w-lg mx-auto px-6 pt-12 pb-24">
-                <div className="text-center mb-10">
-                    <div className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 px-4 py-1.5 rounded-full text-emerald-300 text-sm font-medium backdrop-blur-sm">
-            <span className="relative flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-            </span>
-                        Session Active
-                    </div>
+                {/* Header */}
+                <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+                    <h1 className="text-2xl font-bold text-gray-800">Active Parking Session</h1>
+                    <p className="text-sm text-gray-500 mt-1">Monitor or release your current parking spot allocation.</p>
                 </div>
 
-                <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl shadow-black/20">
-                    <div className="flex items-center justify-between mb-8">
-                        <div className="flex items-center gap-4">
-                            <div className="p-4 bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl shadow-lg shadow-blue-500/20">
-                                <Car size={32} />
+                {!session ? (
+                    /* Empty State */
+                    <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center shadow-sm space-y-5">
+                        <div className="w-14 h-14 bg-indigo-50 text-indigo-500 rounded-2xl flex items-center justify-center mx-auto">
+                            <Clock size={28} />
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-bold text-gray-800">No Active Session</h3>
+                            <p className="text-sm text-gray-500 max-w-xs mx-auto mt-1">
+                                You are not currently parked in any spot.
+                            </p>
+                        </div>
+                        <Link
+                            href="/dashboard/map"
+                            className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold transition shadow-sm"
+                        >
+                            Find a Parking Spot <ArrowRight size={16} />
+                        </Link>
+                    </div>
+                ) : (
+                    /* Active Session */
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+                        {/* Main Metrics Panel (2 cols) */}
+                        <div className="md:col-span-2 space-y-6">
+
+                            {/* Timer & Cost */}
+                            <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm grid grid-cols-2 gap-6">
+                                <div>
+                                    <span className="text-xs text-gray-500 font-semibold uppercase tracking-wider flex items-center gap-1">
+                                        <Clock size={14} className="text-blue-500" /> Duration
+                                    </span>
+                                    <p className="text-3xl font-bold text-gray-800 font-mono mt-1">
+                                        {formatTime(elapsedSeconds)}
+                                    </p>
+                                </div>
+                                <div>
+                                    <span className="text-xs text-gray-500 font-semibold uppercase tracking-wider flex items-center gap-1">
+                                        <DollarSign size={14} className="text-emerald-500" /> Current Cost
+                                    </span>
+                                    <p className="text-3xl font-bold text-emerald-600 font-mono mt-1">
+                                        ${currentCost}
+                                    </p>
+                                </div>
                             </div>
-                            <div>
-                                <h2 className="text-3xl font-bold tracking-wide">{sessionData.vehiclePlate}</h2>
-                                <div className="flex items-center gap-2 mt-1 text-gray-400">
-                                    <MapPin size={14} />
-                                    <span className="text-sm">Spot {sessionData.spot}</span>
+
+                            {/* Spot Details */}
+                            <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm space-y-4">
+                                <h3 className="text-sm font-bold text-gray-700 border-b border-gray-100 pb-3">Parking Details</h3>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-9 h-9 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center">
+                                            <MapPin size={18} />
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-gray-400 uppercase font-semibold">Spot</p>
+                                            <p className="text-sm font-bold text-gray-800">{session.spotNumber} (Floor {session.floor})</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-9 h-9 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center">
+                                            <Calendar size={18} />
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-gray-400 uppercase font-semibold">Start Time</p>
+                                            <p className="text-sm font-bold text-gray-800">
+                                                {new Date(session.startedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-start gap-2.5 text-xs text-amber-700">
+                                    <AlertTriangle size={14} className="shrink-0 mt-0.5" />
+                                    <span>Rate: <strong>${session.baseHourlyRate.toFixed(2)}/hr</strong>. Please end the session before leaving the lot.</span>
                                 </div>
                             </div>
                         </div>
-                        <ChevronRight size={20} className="text-gray-600" />
-                    </div>
 
-                    {/* Timer & Cost – the core */}
-                    <div className="space-y-6 mb-8">
-                        {/* Timer */}
-                        <div className="bg-black/30 rounded-2xl p-6 border border-white/5">
-                            <div className="flex items-center gap-3 text-gray-400 mb-2">
-                                <Clock size={18} />
-                                <span className="text-sm font-medium">Elapsed Time</span>
+                        {/* End Session Action (1 col) */}
+                        <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm flex flex-col justify-between space-y-6">
+                            <div>
+                                <h3 className="text-sm font-bold text-gray-800">Ready to Leave?</h3>
+                                <p className="text-xs text-gray-500 mt-1">End the session to finalise billing and release the spot.</p>
                             </div>
-                            <div className="text-5xl font-mono font-bold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-300">
-                                {formatTime(elapsed)}
-                            </div>
-                        </div>
-
-                        {/* Cost */}
-                        <div className="bg-black/30 rounded-2xl p-6 border border-white/5">
-                            <div className="flex items-center gap-3 text-gray-400 mb-2">
-                                <DollarSign size={18} />
-                                <span className="text-sm font-medium">Current Cost</span>
-                            </div>
-                            <div className="text-5xl font-mono font-bold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-green-300">
-                                ${cost.toFixed(2)}
-                            </div>
-                        </div>
-
-                        {/* Rate indicator */}
-                        <div className="text-center text-sm text-gray-500 flex items-center justify-center gap-1">
-                            <Timer size={14} />
-                            <span>Rate: ${sessionData.ratePerHour.toFixed(2)} / hour</span>
+                            <button
+                                onClick={handleEndSession}
+                                className="w-full py-3 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-sm font-bold transition shadow-sm hover:shadow-md"
+                            >
+                                End Session & Check Out
+                            </button>
                         </div>
                     </div>
-
-                    {/* End Parking Button */}
-                    {!showEndConfirm ? (
-                        <button
-                            onClick={() => setShowEndConfirm(true)}
-                            className="w-full py-4 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-semibold rounded-2xl shadow-lg shadow-red-600/25 transition-all duration-200 flex items-center justify-center gap-3 text-lg"
-                        >
-                            <Square size={24} fill="currentColor" />
-                            End Parking
-                        </button>
-                    ) : (
-                        <div className="space-y-3">
-                            <p className="text-center text-gray-300 font-medium">
-                                End your session now?
-                            </p>
-                            <div className="flex gap-3">
-                                <button
-                                    onClick={() => setShowEndConfirm(false)}
-                                    className="flex-1 py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-xl transition-colors"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    onClick={handleEndParking}
-                                    className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-xl transition-colors flex items-center justify-center gap-2"
-                                >
-                                    Confirm & Pay
-                                    <DollarSign size={18} />
-                                </button>
-                            </div>
-                        </div>
-                    )}
-                </div>
-
-                {/* Additional quick info */}
-                <p className="text-center text-xs text-gray-500 mt-6">
-                    This session will be automatically billed to your payment method.
-                </p>
-            </main>
-        </div>
+                )}
+            </div>
+        </UserSidebar>
     );
 }

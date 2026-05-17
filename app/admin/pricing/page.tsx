@@ -119,16 +119,6 @@ export default function PricingPage() {
         setEditingId(null);
     };
 
-    const handleDeleteCategory = async (id: string) => {
-        if (!window.confirm("Are you sure you want to remove this parking tier? This will soft-delete the configuration layout.")) return;
-        try {
-            await PricingService.deleteCategory(id);
-            setPrices((prev) => prev.filter((item) => item.id !== id));
-        } catch (err) {
-            handleRequestErrors(err);
-        }
-    };
-
     const handleConfirmDeleteOffer = async () => {
         if (!deleteOfferId) return;
         try {
@@ -315,22 +305,13 @@ export default function PricingPage() {
                                                     </button>
                                                 </>
                                             ) : (
-                                                <>
-                                                    <button
-                                                        onClick={() => handleEdit(price)}
-                                                        className="w-full px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition flex items-center justify-center gap-2 bg-white text-gray-700"
-                                                    >
-                                                        <Edit2 size={16}/>
-                                                        Edit Pricing
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleDeleteCategory(price.id)}
-                                                        title="Delete Category"
-                                                        className="p-2 border border-red-200 text-red-600 rounded-lg hover:bg-red-50 hover:border-red-300 transition flex items-center justify-center bg-white"
-                                                    >
-                                                        <Trash2 size={16}/>
-                                                    </button>
-                                                </>
+                                                <button
+                                                    onClick={() => handleEdit(price)}
+                                                    className="w-full px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition flex items-center justify-center gap-2 bg-white text-gray-700"
+                                                >
+                                                    <Edit2 size={16}/>
+                                                    Edit Pricing
+                                                </button>
                                             )}
                                         </div>
                                     </div>

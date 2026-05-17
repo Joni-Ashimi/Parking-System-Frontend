@@ -422,12 +422,6 @@ export default function ParkingSpotsConfig() {
                                 </div>
 
                                 <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
-                                    <p className="text-sm text-gray-600">
-                                        Hourly rate for this spot:{" "}
-                                        <span className="font-bold text-gray-800">
-                                            ${Number(displayedHourlyRate).toFixed(2)}
-                                        </span>
-                                    </p>
                                     <p className="text-xs text-gray-500 mt-1">
                                         Rate is determined dynamically by the database configuration for this category
                                         structural mapping.
