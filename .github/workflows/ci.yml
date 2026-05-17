@@ -1,0 +1,40 @@
+name: Frontend Build and Test Check
+
+on:
+  push:
+    # ADJUST THESE: Change to match your frontend branch naming strategies if needed
+    branches: [ front-develop, main ]
+  pull_request:
+    branches: [ front-develop, main ]
+  workflow_dispatch:
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Check for Linting Errors
+        # Next.js projects come with ESLint rules out of the box.
+        # This prevents pushing messy or unformatted code.
+        run: npm run lint --if-present
+
+      - name: Run Next.js Production Build
+        # CRITICAL FOR FRONTEND: This compiles your React components.
+        # It catches missing imports, bad types, or broken routing pages.
+        run: npm run build
+
+      - name: Run Frontend Unit Tests
+        # Passes nicely if you don't have tests written for your components yet
+        run: npm test -- --passWithNoTests
