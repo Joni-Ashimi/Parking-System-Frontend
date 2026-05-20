@@ -24,6 +24,8 @@ export default function RegisterPage() {
 
     const [fullName, setFullName] = useState("");
     const [email, setEmail] = useState("");
+    const [phoneNumber, setPhoneNumber] = useState("");
+    const [gender, setGender] = useState("MALE");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
 
@@ -34,17 +36,21 @@ export default function RegisterPage() {
         if (password.length < 8 || confirmPassword.length < 8) {
             showError("Password must be at least 8 characters long");
             return;
-        };
+        }
+        ;
 
         if (password !== confirmPassword) {
             showError("Confirm Password do not match");
             return;
-        };
+        }
+        ;
 
         try {
             const response = await AuthService.register(
                 fullName,
                 email,
+                phoneNumber,
+                gender,
                 password,
                 confirmPassword,
             );
@@ -97,7 +103,6 @@ export default function RegisterPage() {
                     <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
                         <div className="space-y-4">
 
-                            {/* FULL NAME */}
                             <div>
                                 <label className="text-sm text-gray-600">Full Name</label>
                                 <input
@@ -115,6 +120,32 @@ export default function RegisterPage() {
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                             />
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="text-sm text-gray-600 font-medium">Phone Number</label>
+                                    <input
+                                        type="tel"
+                                        value={phoneNumber}
+                                        onChange={(e) => setPhoneNumber(e.target.value)}
+                                        className="w-full mt-1 px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 text-sm text-gray-800"
+                                        placeholder="+3556..."
+                                        required
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="text-sm text-gray-600 font-medium">Gender</label>
+                                    <select
+                                        value={gender}
+                                        onChange={(e) => setGender(e.target.value)}
+                                        className="w-full mt-1 px-4 py-3 border border-gray-200 bg-white rounded-lg focus:outline-none focus:border-blue-500 text-sm text-gray-800 h-[46px]"
+                                    >
+                                        <option value="MALE">Male</option>
+                                        <option value="FEMALE">Female</option>
+                                    </select>
+                                </div>
+                            </div>
 
                             <CPasswordInput
                                 label="Password"

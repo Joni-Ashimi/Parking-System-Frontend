@@ -4,6 +4,7 @@ type User = {
     id: string;
     email: string;
     name: string;
+    type: 'admin' | 'registered' | 'guest';
     tokenVersion: number;
 };
 
