@@ -4,6 +4,7 @@ import Providers from '@/store/Providers';
 import {ToastContainer} from 'react-toastify';
 import {Footer} from "antd/es/layout/layout";
 import AuthGuard from "@/components/AuthGuard";
+import GlobalChat from "@/components/GlobalChat";
 
 export const metadata: Metadata = {
     title: "Create Next App",
@@ -20,6 +21,7 @@ export default function RootLayout({children}: Readonly<{
             <AuthGuard>
                 <main className="flex-grow">{children}</main>
             </AuthGuard>
+            <GlobalChat/>
             <Footer/>
             <ToastContainer/>
         </Providers>
