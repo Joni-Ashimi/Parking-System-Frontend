@@ -24,6 +24,7 @@ export interface ParkingSpot {
         name: string;
         size: VehicleSize;
         baseHourlyRate: string | number;
+        effectiveHourlyRate?: string | number;
     };
     lot?: {
         id: string;
