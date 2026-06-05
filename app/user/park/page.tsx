@@ -1,160 +1,227 @@
 "use client";
 
 import {useEffect, useMemo, useState} from "react";
-import {Car, DollarSign, Layers, Loader2, Navigation, X} from "lucide-react";
+import {AlertCircle, Bike, Car, CheckCircle2, CreditCard, MapPin, Navigation, Tag, Truck, X} from "lucide-react";
 import UserSidebar from "@/components/sidebar/userSidebar";
 import ParkingSpotService from "@/services/ParkingSpotService";
+import CardsService from "@/services/CardsService";
+import VehicleService from "@/services/VehicleService";
+import ParkingSessionService from "@/services/ParkingSessionService";
 import {handleRequestErrors} from "@/utils/functions";
+import dynamic from "next/dynamic";
+import {useRouter} from "next/navigation";
 
-// Mapped types to match your full backend entity schema
+const AddCardModal = dynamic(() => import("@/components/payment/AddCardModal"), {ssr: false});
+const ReservationModal = dynamic(() => import("@/components/payment/ReservationModal"), {ssr: false});
+
 type VehicleSize = "small" | "medium" | "large";
 type SpotStatus = "available" | "occupied" | "maintenance" | "reserved";
+
+interface SpotType {
+    id: string;
+    name: string;
+    size: VehicleSize;
+    baseHourlyRate: number;
+    effectiveHourlyRate: number;
+    isDiscounted: boolean;
+    activeRuleName: string | null;
+}
 
 interface ParkingSpot {
     id: string;
     spotNumber: string;
     floor: number;
     status: SpotStatus;
-    type?: {
-        id: string;
-        name: string;
-        size: VehicleSize;
-        baseHourlyRate: string | number;
-    };
-    lot?: {
-        id: string;
-        name: string;
-    };
+    type?: SpotType;
+    lot?: { id: string; name: string };
 }
+
+interface Vehicle {
+    id: string;
+    type: string;
+    plateNumber: string;
+    isDefault: boolean;
+}
+
+interface Card {
+    id: string;
+    hiddenNumber: string;
+    isDefault: boolean;
+    pokCardId: string;
+}
+
+const VEHICLE_SIZE_MAP: Record<string, VehicleSize> = {
+    car: "medium",
+    motorcycle: "small",
+    truck: "large",
+    bus: "large",
+};
+
+const VEHICLE_ICONS: Record<string, any> = {
+    car: Car,
+    motorcycle: Bike,
+    truck: Truck,
+    bus: Truck,
+};
 
 export default function DynamicUserMapPage() {
     const [spots, setSpots] = useState<ParkingSpot[]>([]);
     const [selectedSpot, setSelectedSpot] = useState<ParkingSpot | null>(null);
     const [loading, setLoading] = useState(true);
+    const [userCards, setUserCards] = useState<Card[]>([]);
+    const [defaultVehicle, setDefaultVehicle] = useState<Vehicle | null>(null);
+    const [isAddCardOpen, setIsAddCardOpen] = useState(false);
+    const [isReserveOpen, setIsReserveOpen] = useState(false);
+    const router = useRouter();
+
+    const compatibleSize = defaultVehicle ? VEHICLE_SIZE_MAP[defaultVehicle.type] : null;
 
     useEffect(() => {
-        const fetchLiveSpots = async () => {
-            try {
-                setLoading(true);
-                const response = await ParkingSpotService.findAllUserMap();
-                setSpots(response.data);
-            } catch (err) {
-                handleRequestErrors(err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchLiveSpots();
+        Promise.all([
+            CardsService.listUserCards(),
+            VehicleService.getDefaultVehicle().catch(() => null),
+        ]).then(([cards, vehicle]) => {
+            setUserCards(cards || []);
+            setDefaultVehicle(vehicle);
+        });
     }, []);
 
-    // Parse, Group, and Sort Grid Layout structures on the fly
-    const spotsByDynamicRow = useMemo(() => {
-        const groupings: Record<string, ParkingSpot[]> = {};
-        const safeSpots = Array.isArray(spots) ? spots : [];
+    useEffect(() => {
+        ParkingSpotService.findAllUserMap()
+            .then(r => setSpots(Array.isArray(r) ? r : r?.data ?? []))
+            .catch(handleRequestErrors)
+            .finally(() => setLoading(false));
+    }, []);
 
-        safeSpots.forEach((spot) => {
-            if (!spot || !spot.spotNumber) return;
-
-            // Extract the row prefix (e.g., "A" from "A-02")
-            const parts = spot.spotNumber.split("-");
-            const rowLetter = parts[0].trim().toUpperCase();
-
-            if (!groupings[rowLetter]) {
-                groupings[rowLetter] = [];
-            }
-            groupings[rowLetter].push(spot);
+    const spotsByRow = useMemo(() => {
+        const groups: Record<string, ParkingSpot[]> = {};
+        spots.forEach(spot => {
+            if (!spot?.spotNumber) return;
+            const row = spot.spotNumber.split("-")[0].trim().toUpperCase();
+            if (!groups[row]) groups[row] = [];
+            groups[row].push(spot);
         });
-
-        // Sort slot positions inside row tracks sequentially (e.g., A-01, A-02)
-        Object.keys(groupings).forEach((rowLetter) => {
-            groupings[rowLetter].sort((a, b) => {
-                const numA = parseInt(a.spotNumber.split("-")[1], 10) || 0;
-                const numB = parseInt(b.spotNumber.split("-")[1], 10) || 0;
-                return numA - numB;
-            });
-        });
-
-        return groupings;
+        Object.values(groups).forEach(g =>
+            g.sort((a, b) => (parseInt(a.spotNumber.split("-")[1]) || 0) - (parseInt(b.spotNumber.split("-")[1]) || 0))
+        );
+        return groups;
     }, [spots]);
 
-    // Track rows sequentially down the screen layout (A, B, C, D, E...)
-    const sortedRowKeys = useMemo(() => {
-        return Object.keys(spotsByDynamicRow).sort();
-    }, [spotsByDynamicRow]);
+    const sortedRows = useMemo(() => Object.keys(spotsByRow).sort(), [spotsByRow]);
 
-    if (loading) {
-        return (
-            <UserSidebar>
-                <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
-                    <Loader2 className="w-8 h-8 text-blue-600 animate-spin mb-2"/>
-                    <p className="text-sm text-gray-500 font-medium">Loading real-time map infrastructure...</p>
-                </div>
-            </UserSidebar>
-        );
-    }
+    const defaultCard = userCards.find(c => c.isDefault) ?? userCards[0] ?? null;
+
+    const handleSpotClick = (spot: ParkingSpot) => {
+        if (spot.status !== "available") return;
+        if (compatibleSize && spot.type?.size?.toLowerCase() !== compatibleSize.toLowerCase()) return;
+        setSelectedSpot(spot);
+    };
+    const getSpotState = (spot: ParkingSpot): "selected" | "compatible" | "incompatible" | "occupied" | "maintenance" => {
+        if (selectedSpot?.id === spot.id) return "selected";
+        if (spot.status === "occupied") return "occupied";
+        if (spot.status === "maintenance" || spot.status === "reserved") return "maintenance";
+        if (compatibleSize && spot.type?.size?.toLowerCase() !== compatibleSize.toLowerCase()) return "incompatible";
+        return "compatible";
+    };
+
+
+    const spotStateClasses: Record<string, string> = {
+        selected: "bg-blue-600 border-white text-white scale-105 shadow-lg ring-2 ring-blue-400 z-10",
+        compatible: "bg-emerald-50 border-emerald-400 text-emerald-900 hover:bg-emerald-100 cursor-pointer",
+        incompatible: "bg-slate-600 border-transparent text-slate-400 opacity-50 cursor-not-allowed",
+        occupied: "bg-slate-700 border-transparent text-slate-500 opacity-40 cursor-not-allowed",
+        maintenance: "bg-amber-900/40 border-amber-600/40 text-amber-400 opacity-60 cursor-not-allowed",
+    };
+
+    if (loading) return (
+        <UserSidebar>
+            <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
+                <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mb-3"/>
+                <p className="text-sm text-gray-500 font-medium">Loading parking map…</p>
+            </div>
+        </UserSidebar>
+    );
 
     return (
         <UserSidebar>
-            <div className="min-h-screen bg-slate-50 p-4 md:p-8 flex flex-col lg:flex-row gap-6">
+            <div className="min-h-screen bg-slate-50 p-4 md:p-6 flex flex-col lg:flex-row gap-5">
 
-                {/* Left Side: The Interactive Map Container */}
-                <div className="flex-1 space-y-6">
-                    <header className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-                        <h1 className="text-xl font-extrabold text-gray-900">Live Parking Grid</h1>
-                        <p className="text-xs text-gray-500 mt-0.5">This map updates fluidly as changes are authorized
-                            by management.</p>
-                    </header>
+                {/* ── Left: Map ── */}
+                <div className="flex-1 space-y-4 min-w-0">
 
-                    <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm space-y-8">
-                        <div
-                            className="flex items-center justify-between text-xs text-gray-400 pb-2 border-b border-gray-100">
-                            <span className="flex items-center gap-1.5 font-bold uppercase"><Navigation size={14}/> Dynamic Grid Matrix</span>
-                            <span>Entrance Area →</span>
+                    {/* Header */}
+                    <div
+                        className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 flex items-start justify-between gap-4">
+                        <div>
+                            <h1 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                                <Navigation size={18} className="text-blue-500"/> Live Parking Grid
+                            </h1>
+                            <p className="text-xs text-gray-400 mt-0.5">Real-time availability — select a spot to
+                                reserve.</p>
                         </div>
+                        {defaultVehicle && (() => {
+                            const Icon = VEHICLE_ICONS[defaultVehicle.type] ?? Car;
+                            return (
+                                <div
+                                    className="flex items-center gap-2 bg-blue-50 border border-blue-100 rounded-xl px-3 py-2 shrink-0">
+                                    <Icon size={15} className="text-blue-600"/>
+                                    <div className="text-right">
+                                        <p className="text-[10px] text-blue-400 font-medium uppercase">Your vehicle</p>
+                                        <p className="text-xs font-bold text-blue-700">{defaultVehicle.plateNumber}</p>
+                                    </div>
+                                </div>
+                            );
+                        })()}
+                    </div>
 
+                    {/* Legend */}
+                    <div className="flex flex-wrap gap-3 px-1">
+                        {[
+                            {color: "bg-emerald-400", label: "Compatible"},
+                            {color: "bg-slate-500", label: "Incompatible size"},
+                            {color: "bg-slate-700", label: "Occupied"},
+                            {color: "bg-amber-600", label: "Maintenance"},
+                            {color: "bg-blue-600", label: "Selected"},
+                        ].map(({color, label}) => (
+                            <span key={label} className="flex items-center gap-1.5 text-xs text-gray-500">
+                                <span className={`w-2.5 h-2.5 rounded-sm ${color}`}/>
+                                {label}
+                            </span>
+                        ))}
+                    </div>
+
+                    {/* Grid */}
+                    <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
                         {spots.length === 0 ? (
-                            <div className="py-12 text-center text-gray-400 text-sm">
-                                No active zones mapped in the database at the moment.
-                            </div>
+                            <div className="py-16 text-center text-gray-400 text-sm">No spots available.</div>
                         ) : (
-                            <div className="space-y-8 bg-slate-100 p-4 md:p-6 rounded-xl border border-slate-200">
-                                {sortedRowKeys.map((rowKey) => (
-                                    <div key={rowKey} className="relative pl-6">
-                                        {/* Row Label Identifier */}
-                                        <div
-                                            className="absolute left-0 top-1/2 -translate-y-1/2 font-black text-sm text-slate-400">
-                                            {rowKey}
-                                        </div>
-
-                                        {/* STRICT 10-COLUMN GRID LAYOUT */}
-                                        <div
-                                            className="bg-slate-800 p-4 rounded-xl shadow-inner grid grid-cols-10 gap-3">
-                                            {spotsByDynamicRow[rowKey].map((spot) => {
-                                                const isSelected = selectedSpot?.id === spot.id;
-                                                const isAvailable = spot.status === "available";
-
+                            <div className="space-y-6 bg-slate-100 p-4 rounded-xl border border-slate-200">
+                                {sortedRows.map(row => (
+                                    <div key={row} className="relative pl-7">
+                                        <span
+                                            className="absolute left-0 top-1/2 -translate-y-1/2 font-black text-xs text-slate-400">{row}</span>
+                                        <div className="bg-slate-800 p-3 rounded-xl grid grid-cols-10 gap-2">
+                                            {spotsByRow[row].map(spot => {
+                                                const state = getSpotState(spot);
                                                 return (
                                                     <button
                                                         key={spot.id}
-                                                        disabled={!isAvailable}
-                                                        onClick={() => setSelectedSpot(spot)}
-                                                        className={`h-20 rounded transition-all flex flex-col items-center justify-between p-1.5 border font-mono w-full ${
-                                                            isSelected
-                                                                ? "bg-blue-600 border-white text-white scale-105 shadow-md ring-2 ring-blue-400 z-10"
-                                                                : isAvailable
-                                                                    ? "bg-emerald-50 border-emerald-500 text-emerald-900 hover:bg-emerald-100/80"
-                                                                    : spot.status === "occupied"
-                                                                        ? "bg-slate-700 border-transparent text-slate-500 opacity-40 cursor-not-allowed"
-                                                                        : "bg-amber-100 border-amber-400 text-amber-700 cursor-not-allowed"
-                                                        }`}
+                                                        disabled={state === "occupied" || state === "maintenance" || state === "incompatible"}
+                                                        onClick={() => handleSpotClick(spot)}
+                                                        title={spot.type ? `${spot.type.name} · €${spot.type.effectiveHourlyRate}/hr` : spot.spotNumber}
+                                                        className={`h-16 rounded-lg transition-all flex flex-col items-center justify-between p-1.5 border text-[9px] font-bold font-mono w-full ${spotStateClasses[state]}`}
                                                     >
                                                         <span
-                                                            className="text-[10px] font-bold tracking-tight">{spot.spotNumber}</span>
-                                                        {spot.status === "occupied" ? (
-                                                            <Car size={16} className="text-slate-500"/>
-                                                        ) : (
-                                                            <div className="w-1.5 h-1.5 rounded-full bg-current"/>
+                                                            className="tracking-tight leading-tight">{spot.spotNumber.split("-")[1] ?? spot.spotNumber}</span>
+                                                        {state === "occupied"
+                                                            ? <Car size={12} className="text-slate-500"/>
+                                                            : state === "selected"
+                                                                ? <CheckCircle2 size={12}/>
+                                                                : <div className="w-1 h-1 rounded-full bg-current"/>
+                                                        }
+                                                        {spot.type?.isDiscounted && state === "compatible" && (
+                                                            <span
+                                                                className="text-[7px] text-emerald-600 font-black">DEAL</span>
                                                         )}
                                                     </button>
                                                 );
@@ -167,90 +234,155 @@ export default function DynamicUserMapPage() {
                     </div>
                 </div>
 
-                {/* Right Side: Contextual Spot Information Window Panel */}
+                {/* ── Right: Spot Detail Panel ── */}
                 {selectedSpot && (
-                    <div
-                        className="w-full lg:w-80 bg-white border border-gray-200 rounded-2xl p-6 shadow-sm h-fit space-y-6 animate-fadeIn sticky top-8">
-                        <div className="flex justify-between items-center pb-3 border-b border-gray-100">
-                            <div>
-                                <h2 className="text-lg font-bold text-gray-800">Spot Details</h2>
-                                <p className="text-xs text-gray-400">Selected Allocation</p>
+                    <div className="w-full lg:w-72 xl:w-80 shrink-0 space-y-4 sticky top-6 h-fit">
+
+                        {/* Spot info card */}
+                        <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm space-y-4">
+                            <div className="flex justify-between items-start">
+                                <div>
+                                    <h2 className="text-base font-bold text-gray-900">Spot {selectedSpot.spotNumber}</h2>
+                                    <p className="text-xs text-gray-400">Floor {selectedSpot.floor}</p>
+                                </div>
+                                <button onClick={() => setSelectedSpot(null)}
+                                        className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 transition">
+                                    <X size={16}/>
+                                </button>
                             </div>
+
+                            {selectedSpot.lot && (
+                                <div className="flex items-center gap-2 text-xs text-gray-500">
+                                    <MapPin size={13} className="text-gray-400"/>
+                                    {selectedSpot.lot.name}
+                                </div>
+                            )}
+
+                            {selectedSpot.type && (
+                                <div className="bg-slate-50 rounded-xl p-3 space-y-2.5 border border-slate-100">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-xs text-gray-500">Category</span>
+                                        <span
+                                            className="text-xs font-bold text-gray-800 bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">
+                                            {selectedSpot.type.name} · {selectedSpot.type.size}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between items-center border-t border-slate-200 pt-2">
+                                        <span className="text-xs text-gray-500">Rate</span>
+                                        <div className="text-right">
+                                            {selectedSpot.type.isDiscounted ? (
+                                                <>
+                                                    <span className="text-xs line-through text-gray-400 mr-1">
+                                                        €{Number(selectedSpot.type.baseHourlyRate).toFixed(2)}
+                                                    </span>
+                                                    <span className="text-sm font-extrabold text-emerald-600">
+                                                        €{selectedSpot.type.effectiveHourlyRate.toFixed(2)}/hr
+                                                    </span>
+                                                </>
+                                            ) : (
+                                                <span className="text-sm font-extrabold text-gray-900">
+                                                    €{Number(selectedSpot.type.effectiveHourlyRate ?? selectedSpot.type.baseHourlyRate).toFixed(2)}/hr
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                    {selectedSpot.type.activeRuleName && (
+                                        <div
+                                            className="flex items-center gap-1.5 text-[10px] text-emerald-700 bg-emerald-50 rounded-lg px-2 py-1">
+                                            <Tag size={10}/>
+                                            {selectedSpot.type.activeRuleName} active
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Payment method */}
+                        <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm space-y-3">
+                            <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Payment
+                                Method</p>
+                            {defaultCard ? (
+                                <div
+                                    className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
+                                    <div
+                                        className="w-9 h-9 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center shrink-0">
+                                        <CreditCard size={16} className="text-white"/>
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-xs font-bold text-gray-800 truncate">
+                                            •••• {defaultCard.hiddenNumber?.slice(-4) ?? "????"}
+                                        </p>
+                                        <p className="text-[10px] text-gray-400">
+                                            {defaultCard.isDefault ? "Default card" : `Card ${userCards.indexOf(defaultCard) + 1}`}
+                                        </p>
+                                    </div>
+                                    {defaultCard.isDefault && (
+                                        <span
+                                            className="text-[9px] font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded-full shrink-0">DEFAULT</span>
+                                    )}
+                                </div>
+                            ) : (
+                                <div className="text-center py-4 border-2 border-dashed border-gray-200 rounded-xl">
+                                    <p className="text-xs text-gray-400 mb-2">No payment method saved</p>
+                                </div>
+                            )}
                             <button
-                                onClick={() => setSelectedSpot(null)}
-                                className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition"
+                                onClick={() => setIsAddCardOpen(true)}
+                                className="w-full text-xs text-blue-600 hover:text-blue-700 font-medium py-1.5 border border-blue-100 hover:border-blue-200 rounded-lg bg-blue-50 hover:bg-blue-100 transition"
                             >
-                                <X size={18}/>
+                                + Add / change card
                             </button>
                         </div>
 
-                        <div className="space-y-4">
-                            {/* Spot Number / Name */}
-                            <div className="flex items-center gap-3">
-                                <div
-                                    className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center font-bold">
-                                    {selectedSpot.spotNumber.split("-")[1] || selectedSpot.spotNumber}
-                                </div>
-                                <div>
-                                    <p className="text-xs text-gray-400 font-medium">Spot Code Identification</p>
-                                    <p className="text-sm font-bold text-gray-800">Row
-                                        Assignment {selectedSpot.spotNumber}</p>
-                                </div>
-                            </div>
-
-                            {/* Deck / Floor Elevation */}
-                            <div className="flex items-center gap-3">
-                                <div
-                                    className="w-10 h-10 bg-slate-50 text-slate-600 rounded-xl flex items-center justify-center">
-                                    <Layers size={18}/>
-                                </div>
-                                <div>
-                                    <p className="text-xs text-gray-400 font-medium">Floor / Level</p>
-                                    <p className="text-sm font-bold text-gray-800">Deck {selectedSpot.floor || 1}</p>
-                                </div>
-                            </div>
-
-                            {/* Linked Category Size Pricing Configuration */}
-                            {selectedSpot.type && (
-                                <div className="p-4 bg-slate-50 rounded-xl border border-gray-100 space-y-2">
-                                    <div className="flex justify-between items-center text-xs">
-                                        <span className="text-gray-500 font-medium">Tariff Category:</span>
-                                        <span
-                                            className="font-bold text-gray-800 uppercase bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-[10px]">
-                                            {selectedSpot.type.name} ({selectedSpot.type.size})
-                                        </span>
-                                    </div>
-                                    <div
-                                        className="flex justify-between items-center pt-2 border-t border-gray-200/60 text-xs">
-                                        <span className="text-gray-500 font-medium flex items-center gap-1">
-                                            <DollarSign size={13}/> Base Hourly Rate:
-                                        </span>
-                                        <span className="font-extrabold text-gray-900 text-sm">
-                                            ${Number(selectedSpot.type.baseHourlyRate || 0).toFixed(2)}/hr
-                                        </span>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Attached Structure Lot Identity metadata mapping */}
-                            {selectedSpot.lot && (
-                                <div className="text-xs text-center text-gray-400 pt-2 border-t border-gray-100">
-                                    Facility Location: <span
-                                    className="font-semibold text-gray-600">{selectedSpot.lot.name}</span>
-                                </div>
-                            )}
-                        </div>
-
+                        {/* Reserve button */}
                         <button
-                            className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl shadow-md font-semibold text-sm transition-all transform hover:-translate-y-0.5"
-                            onClick={() => alert(`Proceeding to lock reservation for slot: ${selectedSpot.spotNumber}`)}
+                            onClick={() => {
+                                if (!defaultCard) {
+                                    setIsAddCardOpen(true);
+                                    return;
+                                }
+                                setIsReserveOpen(true);
+                            }}
+                            className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl shadow-md font-semibold text-sm transition-all hover:-translate-y-0.5"
                         >
                             Reserve Spot
                         </button>
+
+                        {!defaultVehicle && (
+                            <p className="text-xs text-center text-amber-600 flex items-center justify-center gap-1">
+                                <AlertCircle size={12}/> Set a default vehicle to filter compatible spots
+                            </p>
+                        )}
                     </div>
                 )}
-
             </div>
+
+            {isAddCardOpen && (
+                <AddCardModal
+                    onClose={() => setIsAddCardOpen(false)}
+                    onComplete={async () => {
+                        setIsAddCardOpen(false);
+                        const updated = await CardsService.listUserCards();
+                        setUserCards(updated || []);
+                    }}
+                />
+            )}
+
+            {isReserveOpen && selectedSpot && defaultCard && (
+                <ReservationModal
+                    spot={selectedSpot}
+                    card={defaultCard}
+                    onClose={() => setIsReserveOpen(false)}
+                    onConfirm={async () => {
+                        try {
+                            await ParkingSessionService.reserveSpot(selectedSpot.id, defaultCard.id);
+                            router.push("/user/parking");
+                        } catch (err) {
+                            handleRequestErrors(err);
+                        }
+                    }}
+                />
+            )}
         </UserSidebar>
     );
 }

@@ -21,16 +21,6 @@ const ParkingSpotService = {
 
     getStats: () => API.get(`/parking-spots/stats`),
 
-    findAvailable: (lotId?: string) =>
-        API.get('/parking-spots/available', {
-            params: {lotId},
-        }),
-
-    findOne: (id: string) =>
-        API.get(`/parking-spots/${id}`),
-
-    update: (id: string, data: Partial<ParkingSpotPayload>) => API.patch(`/parking-spots/${id}`, data),
-
     updateStatus: (id: string, status: ParkingSpotStatusType) =>
         API.patch(`/parking-spots/${id}/status`, {status}),
 

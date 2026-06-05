@@ -1,15 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import {
-    AlertCircle, ArrowLeft, Bike, Car, Check,
-    Loader2, Plus, Star, Trash2, Truck,
-} from "lucide-react";
+import {useCallback, useEffect, useState} from "react";
+import {AlertCircle, ArrowLeft, Bike, Car, Check, Loader2, Plus, Star, Trash2, Truck,} from "lucide-react";
 import Link from "next/link";
 import UserSidebar from "@/components/sidebar/userSidebar";
 import VehicleService from "@/services/VehicleService";
-import { useSelector } from "react-redux";
-import type { RootState } from "@/store/store";
+import {useSelector} from "react-redux";
+import type {RootState} from "@/store/store";
 
 type VehicleType = "car" | "motorcycle" | "truck";
 
@@ -17,27 +14,27 @@ interface Vehicle {
     id: string;
     plateNumber: string;
     type: VehicleType;
-    defaultVehicle: boolean;
+    isDefault: boolean;
 }
 
 export default function VehiclesPage() {
     const user = useSelector((state: RootState) => state.auth.user);
 
-    const [vehicles, setVehicles]     = useState<Vehicle[]>([]);
-    const [loading, setLoading]       = useState(true);
+    const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+    const [loading, setLoading] = useState(true);
     const [fetchError, setFetchError] = useState("");
 
     // Modal state
     const [showAddModal, setShowAddModal] = useState(false);
-    const [newPlate, setNewPlate]         = useState("");
-    const [newType, setNewType]           = useState<VehicleType>("car");
-    const [submitting, setSubmitting]     = useState(false);
-    const [formError, setFormError]       = useState("");
+    const [newPlate, setNewPlate] = useState("");
+    const [newType, setNewType] = useState<VehicleType>("car");
+    const [submitting, setSubmitting] = useState(false);
+    const [formError, setFormError] = useState("");
 
     // Per-card action state
-    const [deletingId, setDeletingId]         = useState<string | null>(null);
+    const [deletingId, setDeletingId] = useState<string | null>(null);
     const [settingDefaultId, setSettingDefaultId] = useState<string | null>(null);
-    const [cardError, setCardError]           = useState<Record<string, string>>({});
+    const [cardError, setCardError] = useState<Record<string, string>>({});
 
     const fetchVehicles = useCallback(async () => {
         if (!user?.id) return;
@@ -59,15 +56,15 @@ export default function VehiclesPage() {
 
     const handleSetDefault = async (id: string) => {
         setSettingDefaultId(id);
-        setCardError((prev) => ({ ...prev, [id]: "" }));
+        setCardError((prev) => ({...prev, [id]: ""}));
         try {
             await VehicleService.markAsDefault(id);
             setVehicles((prev) =>
-                prev.map((v) => ({ ...v, defaultVehicle: v.id === id }))
+                prev.map((v) => ({...v, isDefault: v.id === id}))
             );
         } catch (err: any) {
             const msg = err?.response?.data?.message ?? "Failed to set default.";
-            setCardError((prev) => ({ ...prev, [id]: msg }));
+            setCardError((prev) => ({...prev, [id]: msg}));
         } finally {
             setSettingDefaultId(null);
         }
@@ -75,13 +72,13 @@ export default function VehiclesPage() {
 
     const handleDelete = async (id: string) => {
         setDeletingId(id);
-        setCardError((prev) => ({ ...prev, [id]: "" }));
+        setCardError((prev) => ({...prev, [id]: ""}));
         try {
             await VehicleService.delete(id);
             setVehicles((prev) => prev.filter((v) => v.id !== id));
         } catch (err: any) {
             const msg = err?.response?.data?.message ?? "Failed to delete vehicle.";
-            setCardError((prev) => ({ ...prev, [id]: msg }));
+            setCardError((prev) => ({...prev, [id]: msg}));
         } finally {
             setDeletingId(null);
         }
@@ -106,7 +103,7 @@ export default function VehiclesPage() {
                 id: res.data.id,
                 plateNumber: res.data.plateNumber,
                 type: res.data.type as VehicleType,
-                defaultVehicle: res.data.defaultVehicle ?? vehicles.length === 0,
+                isDefault: res.data.isDefault ?? vehicles.length === 0,
             };
             setVehicles((prev) => [...prev, created]);
             setNewPlate("");
@@ -128,17 +125,23 @@ export default function VehiclesPage() {
 
     const getVehicleIcon = (type: VehicleType) => {
         switch (type) {
-            case "car":        return <Car   size={28} className="text-blue-600" />;
-            case "motorcycle": return <Bike  size={28} className="text-emerald-600" />;
-            case "truck":      return <Truck size={28} className="text-amber-600" />;
+            case "car":
+                return <Car size={28} className="text-blue-600"/>;
+            case "motorcycle":
+                return <Bike size={28} className="text-emerald-600"/>;
+            case "truck":
+                return <Truck size={28} className="text-amber-600"/>;
         }
     };
 
     const getTypeLabel = (type: VehicleType) => {
         switch (type) {
-            case "car":        return "Car";
-            case "motorcycle": return "Motorcycle";
-            case "truck":      return "Truck / Van";
+            case "car":
+                return "Car";
+            case "motorcycle":
+                return "Motorcycle";
+            case "truck":
+                return "Truck / Van";
         }
     };
 
@@ -150,8 +153,9 @@ export default function VehiclesPage() {
                         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
-                                    <Link href="/user/dashboard" className="p-2 -ml-2 rounded-full hover:bg-gray-100 transition-colors">
-                                        <ArrowLeft size={20} className="text-gray-600" />
+                                    <Link href="/user/dashboard"
+                                          className="p-2 -ml-2 rounded-full hover:bg-gray-100 transition-colors">
+                                        <ArrowLeft size={20} className="text-gray-600"/>
                                     </Link>
                                     <h1 className="text-2xl font-bold text-gray-800">My Vehicles</h1>
                                 </div>
@@ -159,7 +163,7 @@ export default function VehiclesPage() {
                                     onClick={() => setShowAddModal(true)}
                                     className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors shadow-sm font-medium text-sm"
                                 >
-                                    <Plus size={18} /> Add Vehicle
+                                    <Plus size={18}/> Add Vehicle
                                 </button>
                             </div>
                         </div>
@@ -167,26 +171,27 @@ export default function VehiclesPage() {
 
                     <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
                         {fetchError && (
-                            <div className="mb-6 flex items-start gap-3 bg-red-50 text-red-800 text-sm p-4 rounded-xl border border-red-200">
-                                <AlertCircle size={18} className="flex-shrink-0 mt-0.5" />
+                            <div
+                                className="mb-6 flex items-start gap-3 bg-red-50 text-red-800 text-sm p-4 rounded-xl border border-red-200">
+                                <AlertCircle size={18} className="flex-shrink-0 mt-0.5"/>
                                 <p>{fetchError}</p>
                             </div>
                         )}
 
                         {loading ? (
                             <div className="flex items-center justify-center py-24">
-                                <Loader2 size={36} className="animate-spin text-blue-500" />
+                                <Loader2 size={36} className="animate-spin text-blue-500"/>
                             </div>
                         ) : vehicles.length === 0 ? (
                             <div className="text-center py-20 bg-white rounded-2xl border border-gray-200 shadow-sm">
-                                <Car size={48} className="mx-auto text-gray-300 mb-4" />
+                                <Car size={48} className="mx-auto text-gray-300 mb-4"/>
                                 <h3 className="text-xl font-semibold text-gray-800 mb-2">No vehicles yet</h3>
                                 <p className="text-gray-500 mb-6">Add your first vehicle to start parking.</p>
                                 <button
                                     onClick={() => setShowAddModal(true)}
                                     className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium"
                                 >
-                                    <Plus size={18} /> Add Vehicle
+                                    <Plus size={18}/> Add Vehicle
                                 </button>
                             </div>
                         ) : (
@@ -195,14 +200,15 @@ export default function VehiclesPage() {
                                     <div
                                         key={vehicle.id}
                                         className={`relative bg-white rounded-2xl border-2 p-5 shadow-sm transition-all ${
-                                            vehicle.defaultVehicle
+                                            vehicle.isDefault
                                                 ? "border-blue-500 ring-1 ring-blue-200"
                                                 : "border-gray-100 hover:border-gray-200"
                                         }`}
                                     >
-                                        {vehicle.defaultVehicle && (
-                                            <span className="absolute -top-2.5 right-4 inline-flex items-center gap-1 bg-blue-600 text-white text-xs font-medium px-3 py-1 rounded-full shadow-sm">
-                                                <Star size={12} fill="currentColor" /> Default
+                                        {vehicle.isDefault && (
+                                            <span
+                                                className="absolute -top-2.5 right-4 inline-flex items-center gap-1 bg-blue-600 text-white text-xs font-medium px-3 py-1 rounded-full shadow-sm">
+                                                <Star size={12} fill="currentColor"/> Default
                                             </span>
                                         )}
 
@@ -221,20 +227,20 @@ export default function VehiclesPage() {
                                         {/* Per-card error */}
                                         {cardError[vehicle.id] && (
                                             <p className="mt-3 text-xs text-red-600 flex items-center gap-1">
-                                                <AlertCircle size={12} /> {cardError[vehicle.id]}
+                                                <AlertCircle size={12}/> {cardError[vehicle.id]}
                                             </p>
                                         )}
 
                                         <div className="mt-5 pt-4 border-t border-gray-100 flex gap-2">
-                                            {!vehicle.defaultVehicle && (
+                                            {!vehicle.isDefault && (
                                                 <button
                                                     onClick={() => handleSetDefault(vehicle.id)}
                                                     disabled={settingDefaultId === vehicle.id}
                                                     className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-medium text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50"
                                                 >
                                                     {settingDefaultId === vehicle.id
-                                                        ? <Loader2 size={16} className="animate-spin" />
-                                                        : <Check size={16} />}
+                                                        ? <Loader2 size={16} className="animate-spin"/>
+                                                        : <Check size={16}/>}
                                                     Set Default
                                                 </button>
                                             )}
@@ -244,8 +250,8 @@ export default function VehiclesPage() {
                                                 className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-medium text-red-700 bg-red-50 rounded-lg hover:bg-red-100 transition-colors disabled:opacity-50"
                                             >
                                                 {deletingId === vehicle.id
-                                                    ? <Loader2 size={16} className="animate-spin" />
-                                                    : <Trash2 size={16} />}
+                                                    ? <Loader2 size={16} className="animate-spin"/>
+                                                    : <Trash2 size={16}/>}
                                                 Remove
                                             </button>
                                         </div>
@@ -256,16 +262,18 @@ export default function VehiclesPage() {
                                     onClick={() => setShowAddModal(true)}
                                     className="border-2 border-dashed border-gray-300 rounded-2xl flex flex-col items-center justify-center gap-3 p-8 text-gray-500 hover:border-blue-400 hover:text-blue-600 transition-all min-h-[200px] bg-white/50"
                                 >
-                                    <Plus size={32} />
+                                    <Plus size={32}/>
                                     <span className="font-medium">Add New Vehicle</span>
                                 </button>
                             </div>
                         )}
 
                         {!loading && vehicles.length > 0 && (
-                            <div className="mt-8 flex items-start gap-3 bg-blue-50 text-blue-800 text-sm p-4 rounded-xl border border-blue-200">
-                                <AlertCircle size={18} className="flex-shrink-0 mt-0.5" />
-                                <p>Your default vehicle is automatically selected when starting a parking session. You can change it anytime.</p>
+                            <div
+                                className="mt-8 flex items-start gap-3 bg-blue-50 text-blue-800 text-sm p-4 rounded-xl border border-blue-200">
+                                <AlertCircle size={18} className="flex-shrink-0 mt-0.5"/>
+                                <p>Your default vehicle is automatically selected when starting a parking session. You
+                                    can change it anytime.</p>
                             </div>
                         )}
                     </main>
@@ -274,7 +282,7 @@ export default function VehiclesPage() {
 
             {showAddModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                    <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={closeModal} />
+                    <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={closeModal}/>
                     <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
                         <div className="px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-700">
                             <h3 className="text-lg font-bold text-white">Add New Vehicle</h3>
@@ -296,7 +304,7 @@ export default function VehiclesPage() {
                                 />
                                 {formError && (
                                     <p className="text-xs text-red-600 mt-1 flex items-center gap-1">
-                                        <AlertCircle size={12} /> {formError}
+                                        <AlertCircle size={12}/> {formError}
                                     </p>
                                 )}
                             </div>
@@ -317,9 +325,9 @@ export default function VehiclesPage() {
                                                     : "border-gray-200 hover:border-gray-300 text-gray-600"
                                             }`}
                                         >
-                                            {type === "car"        && <Car   size={24} />}
-                                            {type === "motorcycle" && <Bike  size={24} />}
-                                            {type === "truck"      && <Truck size={24} />}
+                                            {type === "car" && <Car size={24}/>}
+                                            {type === "motorcycle" && <Bike size={24}/>}
+                                            {type === "truck" && <Truck size={24}/>}
                                             <span className="text-xs font-medium">
                                                 {type === "motorcycle" ? "Motorcycle" : type.charAt(0).toUpperCase() + type.slice(1)}
                                             </span>
@@ -342,7 +350,7 @@ export default function VehiclesPage() {
                                 disabled={submitting}
                                 className="px-5 py-2 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition-colors flex items-center gap-2 disabled:opacity-60"
                             >
-                                {submitting ? <Loader2 size={18} className="animate-spin" /> : <Plus size={18} />}
+                                {submitting ? <Loader2 size={18} className="animate-spin"/> : <Plus size={18}/>}
                                 Add Vehicle
                             </button>
                         </div>

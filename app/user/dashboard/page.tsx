@@ -6,12 +6,8 @@ import UserSidebar from "@/components/sidebar/userSidebar";
 import Link from "next/link";
 
 export default function UserDashboard() {
-    // Simple states for high-level numbers (mocked or fetched easily)
     const [userFirstName, setUserFirstName] = useState("Driver");
-    const [activeSession, setActiveSession] = useState<{ spot: string; duration: string } | null>({
-        spot: "A-12",
-        duration: "1h 45m"
-    });
+    const [activeSession, setActiveSession] = useState<{ spot: string; duration: string } | null>();
 
     return (
         <UserSidebar>
@@ -32,7 +28,7 @@ export default function UserDashboard() {
                 </header>
 
                 {/* Highlight Banner: Live Activity Tracker */}
-                {activeSession ? (
+                {activeSession && (
                     <div
                         className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-6 text-white shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div className="flex items-center gap-4">
@@ -51,20 +47,10 @@ export default function UserDashboard() {
                             Manage Session <ArrowRight size={16}/>
                         </Link>
                     </div>
-                ) : (
-                    <div
-                        className="bg-white border border-dashed border-gray-300 rounded-2xl p-6 text-center text-gray-500">
-                        <p className="text-sm">You do not have any active parking sessions right now.</p>
-                        <Link href="/dashboard/map"
-                              className="inline-block mt-3 text-sm font-bold text-blue-600 hover:underline">
-                            Find and reserve a spot now →
-                        </Link>
-                    </div>
                 )}
 
                 {/* Navigation Quick Links Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-
                     {/* Card 1: Map Layout */}
                     <Link href="/user/park"
                           className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition group">
@@ -96,7 +82,7 @@ export default function UserDashboard() {
                     </Link>
 
                     {/* Card 3: Sessions Placeholder */}
-                    <Link href="/dashboard/sessions"
+                    <Link href="/user/sessions"
                           className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition group">
                         <div
                             className="w-10 h-10 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center mb-4 group-hover:bg-amber-600 group-hover:text-white transition">

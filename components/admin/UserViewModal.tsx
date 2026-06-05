@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import {Calendar, Clock, Mail, Phone, ShieldCheck, X} from "lucide-react";
+import {Calendar, Clock, Mail, Phone, UserCircle, UserCircle2Icon, X} from "lucide-react";
 import {formatDate} from "@/utils/functions";
 
 export interface User {
@@ -101,6 +101,10 @@ export default function AdminUserViewModal({isOpen, onClose, user}: AdminUserVie
                                 <Phone size={15} className="text-gray-400"/>
                                 <span>{user.phone || user.phoneNumber || "No phone added"}</span>
                             </div>
+                            <div className="flex items-center gap-2.5 text-gray-700">
+                                <UserCircle2Icon size={15} className="text-gray-400"/>
+                                <span>{user.gender || "No Gender Selected"}</span>
+                            </div>
                         </div>
                     </div>
 
@@ -122,14 +126,6 @@ export default function AdminUserViewModal({isOpen, onClose, user}: AdminUserVie
                                 </div>
                                 <span
                                     className="text-xs font-semibold text-gray-500">{formatDate(user.lastLoginAt)}</span>
-                            </div>
-                            <div className="flex items-center justify-between text-gray-700">
-                                <div className="flex items-center gap-2.5">
-                                    <ShieldCheck size={15} className="text-gray-400"/>
-                                    <span>System Reference Token</span>
-                                </div>
-                                <span
-                                    className="text-xs font-mono bg-slate-200/60 px-1.5 py-0.5 rounded text-gray-600 font-bold">ID: {user.id.substring(0, 8)}...</span>
                             </div>
                         </div>
                     </div>

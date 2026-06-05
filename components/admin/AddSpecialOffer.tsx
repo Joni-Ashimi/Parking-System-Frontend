@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Check, Loader2, Tag, X } from "lucide-react";
+import {useEffect, useState} from "react";
+import {AlertCircle, Check, Loader2, Tag, X} from "lucide-react";
 
 interface AddOfferModalProps {
     isOpen: boolean;
@@ -10,8 +10,9 @@ interface AddOfferModalProps {
     categories: any[];
 }
 
-export default function AddOfferModal({ isOpen, onClose, onSave, categories }: AddOfferModalProps) {
+export default function AddOfferModal({isOpen, onClose, onSave, categories}: AddOfferModalProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [validationError, setValidationError] = useState("");
 
     const [formData, setFormData] = useState({
         name: "",
@@ -23,17 +24,23 @@ export default function AddOfferModal({ isOpen, onClose, onSave, categories }: A
         spotCategoryId: "",
     });
 
-    // Auto-select the first category ID when the modal opens
     useEffect(() => {
         if (isOpen && categories && categories.length > 0) {
-            setFormData(prev => ({ ...prev, spotCategoryId: categories[0].id }));
+            setFormData(prev => ({...prev, spotCategoryId: categories[0].id}));
         }
     }, [isOpen, categories]);
 
     if (!isOpen) return null;
 
     const handleSubmit = async () => {
-        if (!formData.name || !formData.spotCategoryId) return;
+        if (formData.startHour >= formData.endHour) {
+            setValidationError("Start hour must be less than end hour.");
+            return;
+        }
+        if (formData.startHour === 24) {
+            setValidationError("Start hour cannot be 24:00.");
+            return;
+        }
         setIsSubmitting(true);
         try {
             await onSave(formData);
@@ -47,8 +54,10 @@ export default function AddOfferModal({ isOpen, onClose, onSave, categories }: A
 
     return (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden border border-gray-100 max-h-[90vh] overflow-y-auto">
-                <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4 flex items-center justify-between">
+            <div
+                className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden border border-gray-100 max-h-[90vh] overflow-y-auto">
+                <div
+                    className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4 flex items-center justify-between">
                     <h2 className="text-lg font-bold text-white flex items-center gap-2">
                         <Tag size={18}/> Add Price Rule Modifier
                     </h2>
@@ -70,7 +79,8 @@ export default function AddOfferModal({ isOpen, onClose, onSave, categories }: A
 
                     {/* Linked Target Category */}
                     <div>
-                        <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Target Vehicle Category</label>
+                        <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Target Vehicle
+                            Category</label>
                         <select
                             value={formData.spotCategoryId}
                             onChange={(e) => setFormData({...formData, spotCategoryId: e.target.value})}
@@ -96,7 +106,8 @@ export default function AddOfferModal({ isOpen, onClose, onSave, categories }: A
                             </select>
                         </div>
                         <div>
-                            <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Value Percentage</label>
+                            <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Value
+                                Percentage</label>
                             <input
                                 type="number"
                                 min={1}
@@ -110,7 +121,8 @@ export default function AddOfferModal({ isOpen, onClose, onSave, categories }: A
 
                     {/* Operational Time Windows */}
                     <div>
-                        <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Active Day of Week</label>
+                        <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Active Day of
+                            Week</label>
                         <select
                             value={formData.dayOfWeek}
                             onChange={(e) => setFormData({...formData, dayOfWeek: parseInt(e.target.value)})}
@@ -124,30 +136,54 @@ export default function AddOfferModal({ isOpen, onClose, onSave, categories }: A
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Start Hour (0-23)</label>
-                            <input
-                                type="number"
-                                min={0} max={23}
+                            <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Start
+                                Hour</label>
+                            <select
                                 value={formData.startHour}
-                                onChange={(e) => setFormData({...formData, startHour: parseInt(e.target.value) || 0})}
+                                onChange={(e) => {
+                                    setValidationError("");
+                                    setFormData({...formData, startHour: parseInt(e.target.value)});
+                                }}
                                 className="w-full px-4 py-2 border border-gray-200 rounded-xl bg-white text-gray-800 text-sm focus:outline-none focus:border-blue-500"
-                            />
+                            >
+                                {Array.from({length: 24}, (_, i) => (
+                                    <option key={i} value={i}>
+                                        {`${String(i).padStart(2, "0")}:00`}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
                         <div>
-                            <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">End Hour (0-23)</label>
-                            <input
-                                type="number"
-                                min={0} max={23}
+                            <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">End Hour</label>
+                            <select
                                 value={formData.endHour}
-                                onChange={(e) => setFormData({...formData, endHour: parseInt(e.target.value) || 0})}
+                                onChange={(e) => {
+                                    setValidationError("");
+                                    setFormData({...formData, endHour: parseInt(e.target.value)});
+                                }}
                                 className="w-full px-4 py-2 border border-gray-200 rounded-xl bg-white text-gray-800 text-sm focus:outline-none focus:border-blue-500"
-                            />
+                            >
+                                {Array.from({length: 24}, (_, i) => (
+                                    <option key={i + 1} value={i + 1}>
+                                        {i + 1 === 24 ? "24:00" : `${String(i + 1).padStart(2, "0")}:00`}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
                     </div>
+
+                    {validationError && (
+                        <div
+                            className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+                            <AlertCircle size={16} className="flex-shrink-0"/>
+                            {validationError}
+                        </div>
+                    )}
                 </div>
 
                 <div className="flex justify-end gap-2 p-4 bg-gray-50 border-t border-gray-100">
-                    <button onClick={onClose} className="px-4 py-2 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 bg-white hover:bg-gray-100">
+                    <button onClick={onClose}
+                            className="px-4 py-2 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 bg-white hover:bg-gray-100">
                         Cancel
                     </button>
                     <button

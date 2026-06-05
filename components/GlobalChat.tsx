@@ -1,4 +1,4 @@
-    "use client";
+"use client";
 
 import React, {useState} from 'react';
 import {MessageSquare, X} from 'lucide-react';
@@ -27,7 +27,7 @@ export default function GlobalChat() {
                         className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-4 py-3.5 flex items-center justify-between font-semibold text-sm shadow-sm shrink-0">
                         <div className="flex items-center gap-2">
                             <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"/>
-                            <span>Prometrix Support AI</span>
+                            <span>Prometrix Support Chat</span>
                         </div>
                         <button
                             onClick={() => setIsChatOpen(false)}

@@ -8,9 +8,14 @@
     "start": "next start",
     "lint": "eslint"
   },
+  "overrides": {
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  },
   "dependencies": {
     "@ai-sdk/google": "^3.0.79",
     "@ai-sdk/react": "^3.0.192",
+    "@nebula-ltd/pok-payments-js": "^1.5.5",
     "@nestjs/config": "^4.0.3",
     "@nestjs/typeorm": "^11.0.0",
     "@reduxjs/toolkit": "^2.11.2",

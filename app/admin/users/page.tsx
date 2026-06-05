@@ -82,6 +82,9 @@ export default function AdminUsersPage() {
     const [activeModal, setActiveModal] = useState<"view" | "action" | null>(null);
     const [pendingAction, setPendingAction] = useState<"verified" | "banned" | "delete" | null>(null);
 
+    const [banReason, setBanReason] = useState("");
+    const [violationType, setViolationType] = useState<"overstay" | "fraud" | "other">("other");
+
     const fetchStats = useCallback(async () => {
         try {
             const stats = await UserService.getUsersStats();
@@ -121,12 +124,14 @@ export default function AdminUsersPage() {
     const handleCloseActionModal = () => {
         setTargetUser(null);
         setPendingAction(null);
+        setBanReason("");
     };
 
     const handleCloseModals = () => {
         setActiveModal(null);
         setTargetUser(null);
         setPendingAction(null);
+        setBanReason("");
     };
 
     const handleConfirmStatusChange = async () => {
@@ -136,7 +141,11 @@ export default function AdminUsersPage() {
             if (pendingAction === "verified") {
                 await UserService.activateUser(targetUser.id);
             } else if (pendingAction === "banned") {
-                await UserService.banUser(targetUser.id);
+                await UserService.banUser(targetUser.id, {
+                    reason: banReason,
+                    penaltyAmount: undefined,
+                    violationType: violationType
+                });
             } else if (pendingAction === "delete") {
                 await UserService.deleteUser(targetUser.id);
                 setUsers((prev) => prev.filter((u) => u.id !== targetUser.id));
@@ -377,22 +386,61 @@ export default function AdminUsersPage() {
                     }
                     description={
                         pendingAction === "delete" ? (
-                            <span>
-                    Are you absolutely sure you want to delete the account record for{" "}
+                            <span>Are you absolutely sure you want to delete the account record for{" "}
                                 <span
                                     className="font-semibold text-gray-800">{targetUser.name}</span> ({targetUser.email})?
                     Its access rights will be suspended, but references can be recovered by system engineering.
                 </span>
                         ) : (
-                            <span>
-                    Are you sure you want to change the access permissions for{" "}
+                            <span>Are you sure you want to change the access permissions for{" "}
                                 <span
                                     className="font-semibold text-gray-800">{targetUser.name}</span> ({targetUser.email})?
-                    This changes platform security credentials instantly.
-                </span>
+                                This changes platform security credentials instantly.</span>
                         )
                     }
-                />
+                >
+                    {pendingAction === "banned" && (
+                        <div className="mt-6 space-y-4">
+                            <div>
+                                <label
+                                    className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">
+                                    Ban Description
+                                </label>
+                                <textarea
+                                    placeholder="Explain the reason for this enforcement..."
+                                    className="w-full p-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all resize-none"
+                                    rows={3}
+                                    value={banReason}
+                                    onChange={(e) => setBanReason(e.target.value)}
+                                />
+                            </div>
+                            <div>
+                                <label
+                                    className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">
+                                    Violation Type
+                                </label>
+                                <div className="relative">
+                                    <select
+                                        className="w-full appearance-none bg-white border border-gray-200 text-gray-700 py-2.5 px-3 pr-8 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all cursor-pointer"
+                                        value={violationType}
+                                        onChange={(e) => setViolationType(e.target.value as any)}
+                                    >
+                                        <option value="other">Other</option>
+                                        <option value="overstay">Overstay</option>
+                                        <option value="fraud">Fraud</option>
+                                    </select>
+                                    <div
+                                        className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+                                        <svg className="fill-current h-4 w-4" viewBox="0 0 20 20">
+                                            <path
+                                                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </AdminActionModal>
             )}
 
             {activeModal === "view" && targetUser && (

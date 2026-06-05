@@ -1,7 +1,13 @@
 import API from '../utils/API/API';
 
 const UserService = {
-    getAll: (params: { page?: number; pageSize?: number; qs?: string, sortBy?:string, sortOrder?: "ASC" | "DESC" }) => API.get('/users', { params }),
+    getAll: (params: {
+        page?: number;
+        pageSize?: number;
+        qs?: string,
+        sortBy?: string,
+        sortOrder?: "ASC" | "DESC"
+    }) => API.get('/users', {params}),
     getUsersStats: () => API.get('/users/stats'),
     getById: (id: string) => API.get(`/users/${id}`),
     getMe: () => API.get('/users/me'),
@@ -11,7 +17,8 @@ const UserService = {
     confirmPassword: (data: { code: string; newPassword: string }) => API.post('/auth/password/confirm', data),
     deleteMe: () => API.delete('/users/me'),
     activateUser: (id: string) => API.patch(`/users/${id}/activate`),
-    banUser: (id: string) => API.patch(`/users/${id}/ban`),
+    banUser: (id: string, payload: { reason?: string, penaltyAmount?: number, violationType?: string }) =>
+        API.patch(`/users/${id}/ban`, payload),
     uploadAvatar: (data: FormData) => API.patch('/users/me/avatar', data, {
         headers: {
             'Content-Type': 'multipart/form-data',

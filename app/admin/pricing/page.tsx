@@ -7,6 +7,7 @@ import {handleRequestErrors} from "@/utils/functions";
 import AddOfferModal from "@/components/admin/AddSpecialOffer";
 import PricingService from "@/services/PricingService";
 import AdminActionModal from "@/app/admin/AdminActionModal";
+import ParkingSessionService from "@/services/ParkingSessionService";
 
 const VEHICLE_ICON_MAP: Record<string, any> = {
     bike: Bike,
@@ -54,6 +55,12 @@ export default function PricingPage() {
     const [isSaving, setIsSaving] = useState(false);
     const [deleteOfferId, setDeleteOfferId] = useState<string | null>(null);
 
+    const [stats, setStats] = useState({
+        avgHourlyRate: 0,
+        dailyRevenue: 0,
+        occupancyRate: 0
+    });
+
     const [editForm, setEditForm] = useState({
         hourlyRate: 0,
         dailyRate: 0,
@@ -62,7 +69,11 @@ export default function PricingPage() {
     const loadDashboardData = async () => {
         try {
             const response = await PricingService.getDashboardData();
-            setPrices(response);
+            const order = ["motorcycle", "car", "truck"];
+            const sorted = [...response].sort((a, b) =>
+                order.indexOf(a.vehicleType) - order.indexOf(b.vehicleType)
+            );
+            setPrices(sorted);
         } catch (err) {
             handleRequestErrors(err);
         } finally {
@@ -84,6 +95,7 @@ export default function PricingPage() {
     useEffect(() => {
         loadDashboardData();
         loadSpecialOffers();
+        ParkingSessionService.getPriceMetrics().then(setStats).catch(handleRequestErrors);
     }, []);
 
     const handleEdit = (price: PricingTier) => {
@@ -98,8 +110,11 @@ export default function PricingPage() {
         setIsSaving(true);
         try {
             await PricingService.updateCategoryRates(id, editForm);
-            await loadDashboardData();
-            await loadSpecialOffers();
+            await Promise.all([
+                loadDashboardData(),
+                loadSpecialOffers(),
+                ParkingSessionService.getPriceMetrics().then(setStats)
+            ]);
             setEditingId(null);
         } catch (err) {
             handleRequestErrors(err);
@@ -163,9 +178,24 @@ export default function PricingPage() {
 
                 <div className="p-8">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                        <PricingStatCard title="Average Hourly Rate" value="$5.67" change="+0.50" trend="up"/>
-                        <PricingStatCard title="Daily Revenue" value="$892" change="+12%" trend="up"/>
-                        <PricingStatCard title="Occupancy Rate" value="75%" change="+5%" trend="up"/>
+                        <PricingStatCard
+                            title="Average Hourly Rate"
+                            value={`$${stats.avgHourlyRate.toFixed(2)}`}
+                            change=""
+                            trend="neutral"
+                        />
+                        <PricingStatCard
+                            title="Daily Revenue"
+                            value={`$${stats.dailyRevenue.toFixed(2)}`}
+                            change="+0%"
+                            trend="up"
+                        />
+                        <PricingStatCard
+                            title="Occupancy Rate"
+                            value={`${stats.occupancyRate}%`}
+                            change=""
+                            trend="neutral"
+                        />
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">

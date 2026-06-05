@@ -2,7 +2,7 @@
 
 import {useState} from "react";
 import NavItem from "@/components/NavItem";
-import {Activity, Ban, DollarSign, Map, Menu, ParkingSquare, Radio, Users,} from "lucide-react";
+import {Activity, Ban, DollarSign, Menu, MessageSquareText, ParkingSquare, Radio, Users,} from "lucide-react";
 import Header from "@/hoc/layout/partials/Header";
 
 export default function AdminSidebar({children}: { children: React.ReactNode }) {
@@ -45,13 +45,16 @@ export default function AdminSidebar({children}: { children: React.ReactNode }) 
                         <NavItem icon={<Activity size={18}/>} label="Dashboard" href="/admin/dashboard"
                                  isOpen={isOpen}/>
                         <NavItem icon={<Users size={18}/>} label="Users" href="/admin/users" isOpen={isOpen}/>
-                        <NavItem icon={<ParkingSquare size={18}/>} label="Parking Spots" href="/admin/parkingSpots"
+                        <NavItem icon={<ParkingSquare size={18}/>} label="Manage Spots" href="/admin/parkingSpots"
                                  isOpen={isOpen}/>
-                        <NavItem icon={<DollarSign size={18}/>} label="Pricing" href="/admin/pricing" isOpen={isOpen}/>
+                        <NavItem icon={<DollarSign size={18}/>} label="Manage Price" href="/admin/pricing"
+                                 isOpen={isOpen}/>
                         <NavItem icon={<Radio size={18}/>} label="Live Sessions" href="/admin/sessions"
                                  isOpen={isOpen}/>
-                        <NavItem icon={<Map size={18}/>} label="Map" href="/admin/map" isOpen={isOpen}/>
                         <NavItem icon={<Ban size={18}/>} label="Violations" href="/admin/violation" isOpen={isOpen}/>
+                        <NavItem icon={<MessageSquareText size={18}/>} label="User Feedback" href="/admin/users/feedback"
+                                 isOpen={isOpen}/>
+
                     </nav>
                 </div>
             </aside>
