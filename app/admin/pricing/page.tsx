@@ -60,14 +60,18 @@ export default function PricingPage() {
     });
 
     const loadDashboardData = async () => {
-        try {
-            const response = await PricingService.getDashboardData();
-            setPrices(response);
-        } catch (err) {
-            handleRequestErrors(err);
-        } finally {
-            setIsLoadingCategories(false);
-        }
+    try {
+        const response = await PricingService.getDashboardData();
+        const order = ["motorcycle", "car", "truck"];
+        const sorted = [...response].sort((a, b) => 
+            order.indexOf(a.vehicleType) - order.indexOf(b.vehicleType)
+        );
+        setPrices(sorted);
+    } catch (err) {
+        handleRequestErrors(err);
+    } finally {
+        setIsLoadingCategories(false);
+    }
     };
 
     const loadSpecialOffers = async () => {

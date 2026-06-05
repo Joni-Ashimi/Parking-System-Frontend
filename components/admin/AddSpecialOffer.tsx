@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Check, Loader2, Tag, X } from "lucide-react";
+import { AlertCircle, Check, Loader2, Tag, X } from "lucide-react";
 
 interface AddOfferModalProps {
     isOpen: boolean;
@@ -12,6 +12,7 @@ interface AddOfferModalProps {
 
 export default function AddOfferModal({ isOpen, onClose, onSave, categories }: AddOfferModalProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [validationError, setValidationError] = useState("");
 
     const [formData, setFormData] = useState({
         name: "",
@@ -23,7 +24,6 @@ export default function AddOfferModal({ isOpen, onClose, onSave, categories }: A
         spotCategoryId: "",
     });
 
-    // Auto-select the first category ID when the modal opens
     useEffect(() => {
         if (isOpen && categories && categories.length > 0) {
             setFormData(prev => ({ ...prev, spotCategoryId: categories[0].id }));
@@ -33,7 +33,14 @@ export default function AddOfferModal({ isOpen, onClose, onSave, categories }: A
     if (!isOpen) return null;
 
     const handleSubmit = async () => {
-        if (!formData.name || !formData.spotCategoryId) return;
+                if (formData.startHour >= formData.endHour) {
+            setValidationError("Start hour must be less than end hour.");
+            return;
+        }
+        if (formData.startHour === 24) {
+            setValidationError("Start hour cannot be 24:00.");
+            return;
+        }
         setIsSubmitting(true);
         try {
             await onSave(formData);
@@ -124,26 +131,47 @@ export default function AddOfferModal({ isOpen, onClose, onSave, categories }: A
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Start Hour (0-23)</label>
-                            <input
-                                type="number"
-                                min={0} max={23}
+                            <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Start Hour</label>
+                            <select
                                 value={formData.startHour}
-                                onChange={(e) => setFormData({...formData, startHour: parseInt(e.target.value) || 0})}
+                                onChange={(e) => {
+                                setValidationError("");
+                                setFormData({...formData, startHour: parseInt(e.target.value)});
+                                }}
                                 className="w-full px-4 py-2 border border-gray-200 rounded-xl bg-white text-gray-800 text-sm focus:outline-none focus:border-blue-500"
-                            />
+                            >
+                                {Array.from({length: 24}, (_, i) => (
+                                    <option key={i} value={i}>
+                                        {`${String(i).padStart(2, "0")}:00`}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
                         <div>
-                            <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">End Hour (0-23)</label>
-                            <input
-                                type="number"
-                                min={0} max={23}
+                            <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">End Hour</label>
+                            <select
                                 value={formData.endHour}
-                                onChange={(e) => setFormData({...formData, endHour: parseInt(e.target.value) || 0})}
+                                onChange={(e) => {
+                                setValidationError("");
+                                setFormData({...formData, endHour: parseInt(e.target.value)});
+                                }}
                                 className="w-full px-4 py-2 border border-gray-200 rounded-xl bg-white text-gray-800 text-sm focus:outline-none focus:border-blue-500"
-                            />
+                            >
+                                {Array.from({length: 24}, (_, i) => (
+                                    <option key={i + 1} value={i + 1}>
+                                        {i + 1 === 24 ? "24:00" : `${String(i + 1).padStart(2, "0")}:00`}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
                     </div>
+
+                    {validationError && (
+                        <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+                            <AlertCircle size={16} className="flex-shrink-0"/>
+                            {validationError}
+                        </div>
+                    )}
                 </div>
 
                 <div className="flex justify-end gap-2 p-4 bg-gray-50 border-t border-gray-100">

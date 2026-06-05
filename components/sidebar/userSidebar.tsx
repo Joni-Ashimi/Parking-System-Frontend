@@ -7,16 +7,18 @@ import {
     Car,
     Map,
     Menu,
-    ParkingSquare, User,
+    ParkingSquare,
+    User,
+    MessageSquare,
 } from "lucide-react";
 import Header from "@/hoc/layout/partials/Header";
 
-export default function UserSidebar({ children} : { children: React.ReactNode}) {
+export default function UserSidebar({ children }: { children: React.ReactNode }) {
     const [isOpen, setIsOpen] = useState(true);
 
     return (
         <>
-            {/* Sidebar */}
+        {/* Sidebar */}
             <div
                 className={`fixed left-0 top-0 h-full z-50 bg-white border-r border-gray-200 transition-all duration-300 ${
                     isOpen ? "w-64" : "w-24"
@@ -27,14 +29,14 @@ export default function UserSidebar({ children} : { children: React.ReactNode}) 
                     <div className="flex items-center justify-between mb-8">
                         <div className="flex items-center overflow-hidden">
                             <ParkingSquare className="w-6 h-6 text-blue-600 flex-shrink-0" />
-
+                            
                             <span
                                 className={`ml-2 font-semibold text-gray-800 whitespace-nowrap overflow-hidden transition-all duration-300 ${
                                     isOpen ? "opacity-100 max-w-[200px]" : "opacity-0 max-w-0 ml-0"
                                 }`}
                             >
-                            Prometrix
-                        </span>
+                                Prometrix
+                            </span>
                         </div>
 
                         <button
@@ -55,6 +57,7 @@ export default function UserSidebar({ children} : { children: React.ReactNode}) 
                         <NavItem icon={<Car size={18} />} label="My Vehicles" href="/user/my-vehicles" isOpen={isOpen} />
                         <NavItem icon={<ParkingSquare size={18} />} label="Live Parking" href="/user/parking" isOpen={isOpen} />
                         <NavItem icon={<User size={18} />} label="Profile" href="/user/me" isOpen={isOpen} />
+                        <NavItem icon={<MessageSquare size={18} />} label="Feedback" href="/user/feedback" isOpen={isOpen} />
                     </nav>
                 </div>
             </div>
