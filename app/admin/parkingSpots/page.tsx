@@ -12,7 +12,7 @@ import {handleRequestErrors} from "@/utils/functions";
 import AdminActionModal from "@/app/admin/AdminActionModal";
 
 type VehicleSize = "small" | "medium" | "large";
-type SpotStatus = "available" | "occupied" | "maintenance";
+export type SpotStatus = "available" | "occupied" | "maintenance";
 
 export interface ParkingSpot {
     id: string;
