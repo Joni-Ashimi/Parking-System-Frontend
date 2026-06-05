@@ -1,6 +1,6 @@
 import API from '../utils/API/API';
 
-export const ParkingSpotStatus = ['available', 'occupied', 'maintenance', 'reserved'] as const;
+export const ParkingSpotStatus = ['available', 'occupied', 'maintenance'] as const;
 export type ParkingSpotStatusType = (typeof ParkingSpotStatus)[number];
 
 export interface ParkingSpotPayload {

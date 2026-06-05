@@ -4,7 +4,7 @@ import {useCallback, useEffect, useState} from "react";
 import {AlertCircle, Check, Plus, X,} from "lucide-react";
 import AdminSidebar from "@/components/sidebar/adminSidebar";
 import SpotCard from "@/components/admin/SpotCard";
-import ParkingSpotService, {ParkingSpotPayload} from "@/services/ParkingSpotService";
+import ParkingSpotService, {ParkingSpotPayload, ParkingSpotStatusType} from "@/services/ParkingSpotService";
 import SpotCategoryService from "@/services/SpotCategoryService";
 import Pagination from "@/components/core/Pagination";
 import ParkingLotService from "@/services/ParkingLotService";
@@ -12,7 +12,7 @@ import {handleRequestErrors} from "@/utils/functions";
 import AdminActionModal from "@/app/admin/AdminActionModal";
 
 type VehicleSize = "small" | "medium" | "large";
-type SpotStatus = "available" | "occupied" | "maintenance" | 'reserved';
+type SpotStatus = "available" | "occupied" | "maintenance";
 
 export interface ParkingSpot {
     id: string;
@@ -146,11 +146,11 @@ export default function ParkingSpotsConfig() {
                 floor: formData.floor,
                 lotId: formData.lotId,
                 typeId: formData.typeId,
-                status: formData.status as SpotStatus,
+                status: formData.status as ParkingSpotStatusType,
             };
 
             if (editingSpot) {
-                await ParkingSpotService.update(editingSpot?.id, payload);
+                await ParkingSpotService.updateStatus(editingSpot?.id, payload.status);
             } else {
                 await ParkingSpotService.create(payload);
             }
