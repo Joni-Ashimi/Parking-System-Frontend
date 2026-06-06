@@ -2,6 +2,7 @@
 
 import React, {useState} from 'react';
 import {Send} from 'lucide-react';
+import AuthService from "@/services/AuthService";
 
 interface Message {
     id: string;
@@ -30,14 +31,19 @@ export default function ChatComponent({userId}: ChatComponentProps) {
         setMessages(prev => [...prev, newUserMsg]);
 
         try {
-            const response = await fetch('http://localhost:3001/chat', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({prompt: userText}),
-            });
+            const response = await AuthService.fetchChatResponse(userText);
+            const data = response.data;
 
-            const data = await response.json();
-            setMessages(prev => [...prev, {id: crypto.randomUUID(), role: 'assistant', content: data.response}]);
+            const aiContent = data.response || data.content || data;
+
+            setMessages(prev => [
+                ...prev,
+                {
+                    id: crypto.randomUUID(),
+                    role: 'assistant' as const,
+                    content: aiContent
+                }
+            ]);
         } catch (err) {
             console.error('Fetch error:', err);
         } finally {

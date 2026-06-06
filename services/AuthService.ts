@@ -5,6 +5,7 @@ const AuthService = {
     register: (name: string, email: string, phoneNumber: string, gender: string, password: string, confirmPassword: string) =>
         API.post('/auth/register', {name, email, phoneNumber, gender, password, confirmPassword}),
     refreshToken: (refreshToken: string) => API.post('/auth/refresh', {refreshToken}),
+    fetchChatResponse: (prompt: string) => API.post('/chat', {prompt}),
 };
 
 export default AuthService;
