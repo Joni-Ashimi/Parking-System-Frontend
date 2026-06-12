@@ -279,33 +279,6 @@ export default function PricingPage() {
                                                 </div>
                                             )}
                                         </div>
-
-                                        <div
-                                            className="flex justify-between items-center py-2 border-b border-gray-100">
-                                            <span className="text-gray-600">Daily Rate</span>
-                                            {editingId === price.id ? (
-                                                <div className="flex items-center gap-2">
-                                                    <span className="text-gray-500">$</span>
-                                                    <input
-                                                        type="number"
-                                                        value={editForm.dailyRate}
-                                                        disabled={isSaving}
-                                                        onChange={(e) => setEditForm({
-                                                            ...editForm,
-                                                            dailyRate: parseFloat(e.target.value) || 0
-                                                        })}
-                                                        className="w-20 px-2 py-1 border border-gray-200 rounded text-right bg-white text-gray-800"
-                                                        step="5"
-                                                    />
-                                                    <span className="text-gray-500">/day</span>
-                                                </div>
-                                            ) : (
-                                                <span className="text-xl font-semibold text-gray-800">
-                                ${price.dailyRate}<span className="text-sm font-normal text-gray-500">/day</span>
-                            </span>
-                                            )}
-                                        </div>
-
                                         <div className="bg-green-50 rounded-lg p-3">
                                             <p className="text-xs text-green-700">
                                                 {/* Updated to compare baseline calculations cleanly */}
