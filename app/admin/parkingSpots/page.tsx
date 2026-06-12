@@ -104,6 +104,8 @@ export default function ParkingSpotsConfig() {
 
     useEffect(() => {
         fetchData();
+        console.log("fetchData called");
+        console.log('categories: ', categories);
     }, [fetchData]);
 
     const spotsList = Array.isArray(spots) ? spots : (spots as any).data || [];
@@ -389,7 +391,7 @@ export default function ParkingSpotsConfig() {
                                     />
                                 </div>
 
-                                <div className="relative z-[1000] w-full">
+                                <div className="bg-red-800 relative z-[1000] w-full">
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
                                         Spot Category Type (Linked Rates)
                                     </label>
@@ -405,11 +407,11 @@ export default function ParkingSpotsConfig() {
 
                                     {isTypeDropdownOpen && (
                                         <div
-                                            className="absolute z-[999] w-full mt-1 bg-white border border-gray-300 rounded-xl shadow-lg max-h-60 overflow-auto">
+                                            className="bg-blue-500 absolute z-[999] w-full mt-1 bg-white border border-gray-300 rounded-xl shadow-lg max-h-60 overflow-auto">
                                             {categories.map((category) => (
                                                 <div
                                                     key={category.id}
-                                                    className="px-4 py-2.5 cursor-pointer hover:bg-blue-50 text-gray-900"
+                                                    className="bg-black-900 px-4 py-2.5 cursor-pointer hover:bg-blue-50 text-gray-900"
                                                     onClick={() => {
                                                         setFormData({...formData, typeId: category.id});
                                                         setIsTypeDropdownOpen(false);
