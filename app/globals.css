@@ -1,12 +1,12 @@
 @import "tailwindcss";
 
 :root {
-    color-scheme: light;
+    color-scheme: light !important;
 }
 
 select, option {
-    background-color: white !important;
-    color: #111827 !important;
+    background-color: #ffffff !important;
+    color: #000000 !important;
 }
 
 :where(select, option) {
