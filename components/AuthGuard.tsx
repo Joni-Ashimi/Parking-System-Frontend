@@ -17,12 +17,13 @@ export default function AuthGuard({children}: { children: React.ReactNode }) {
 
         const checkAuthorization = () => {
             const isAdminRoute = pathname.startsWith("/admin");
+            const isUserRoute = pathname.startsWith("/user");
             const isGuestRoute = pathname.startsWith("/login") || pathname.startsWith("/register");
 
             // 1. Not logged in -> kick out of private pages
             if (!accessToken || !user) {
                 if (!isGuestRoute) {
-                    setIsAuthorized(false); // Instantly hide layout content
+                    setIsAuthorized(false);
                     router.replace("/login");
                     return;
                 }
@@ -30,24 +31,31 @@ export default function AuthGuard({children}: { children: React.ReactNode }) {
                 return;
             }
 
-            // Standardize string comparison to catch any case mismatch issues ('Admin' vs 'admin')
             const userRole = user.type?.toString().toLowerCase();
             const isAdmin = userRole === "admin";
-            console.log('isAdmin: ', isAdmin);
 
-            // 2. Logged in as non-admin, trying to access an admin route
+            // 2. Logic: Enforce strict separation
+
+            // If logged in as non-admin, block access to admin routes
             if (isAdminRoute && !isAdmin) {
-                setIsAuthorized(false); // Hard lockdown of the screen elements
+                setIsAuthorized(false);
                 router.replace("/user/dashboard");
                 return;
             }
+
+            // If logged in as admin, block access to user routes
+            if (isUserRoute && isAdmin) {
+                setIsAuthorized(false);
+                router.replace("/admin/dashboard");
+                return;
+            }
+
             setIsAuthorized(true);
         };
 
         checkAuthorization();
     }, [user, accessToken, pathname, router, isHydrated]);
 
-    // Force blank loading screen if hydration isn't ready or if user authorization fails
     if (!isHydrated || !isAuthorized) {
         return (
             <div className="flex h-screen w-screen items-center justify-center bg-gray-50">

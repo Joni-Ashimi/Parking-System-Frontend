@@ -351,7 +351,7 @@ export default function ParkingSpotsConfig() {
                 {isModalOpen && (
                     <div
                         className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+                        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
                             <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
                                 <h2 className="text-xl font-bold text-white">
                                     {editingSpot ? "Edit Parking Spot" : "Add New Parking Spot"}
@@ -389,7 +389,7 @@ export default function ParkingSpotsConfig() {
                                     />
                                 </div>
 
-                                <div className="relative w-full">
+                                <div className="relative z-[1000] w-full">
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
                                         Spot Category Type (Linked Rates)
                                     </label>

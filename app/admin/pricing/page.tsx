@@ -279,13 +279,6 @@ export default function PricingPage() {
                                                 </div>
                                             )}
                                         </div>
-                                        <div className="bg-green-50 rounded-lg p-3">
-                                            <p className="text-xs text-green-700">
-                                                {/* Updated to compare baseline calculations cleanly */}
-                                                Save ${(price.hourlyRate * 24) - price.dailyRate} with daily rate!
-                                            </p>
-                                        </div>
-
                                         <div className="flex gap-2 pt-2">
                                             {editingId === price.id ? (
                                                 <>
