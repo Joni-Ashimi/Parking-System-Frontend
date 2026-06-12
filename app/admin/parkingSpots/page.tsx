@@ -59,6 +59,7 @@ export default function ParkingSpotsConfig() {
         occupiedSpots: 0,
         maintenanceSpots: 0
     });
+    const [isTypeDropdownOpen, setIsTypeDropdownOpen] = useState(false);
 
     const [filterStatus, setFilterStatus] = useState<SpotStatus | "all">("all");
     const [filterSize, setFilterSize] = useState<VehicleSize | "all">("all");
@@ -388,23 +389,37 @@ export default function ParkingSpotsConfig() {
                                     />
                                 </div>
 
-                                <div>
+                                <div className="relative w-full">
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
                                         Spot Category Type (Linked Rates)
                                     </label>
-                                    <select
-                                        value={formData.typeId}
-                                        onChange={(e) => setFormData({...formData, typeId: e.target.value})}
-                                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
-                                        style={{backgroundColor: 'white', color: 'black'}} // HARD FORCED STYLE
+
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsTypeDropdownOpen(!isTypeDropdownOpen)}
+                                        className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-xl text-left flex justify-between items-center text-gray-900"
                                     >
-                                        {categories.map((category) => (
-                                            <option key={category.id} value={category.id}
-                                                    style={{backgroundColor: 'white', color: 'black'}}>
-                                                {category.name} ({category.size})
-                                            </option>
-                                        ))}
-                                    </select>
+                                        {categories.find((c) => c.id === formData.typeId)?.name || "Select Category"}
+                                        <span className="text-gray-400">▼</span>
+                                    </button>
+
+                                    {isTypeDropdownOpen && (
+                                        <div
+                                            className="absolute z-[999] w-full mt-1 bg-white border border-gray-300 rounded-xl shadow-lg max-h-60 overflow-auto">
+                                            {categories.map((category) => (
+                                                <div
+                                                    key={category.id}
+                                                    className="px-4 py-2.5 cursor-pointer hover:bg-blue-50 text-gray-900"
+                                                    onClick={() => {
+                                                        setFormData({...formData, typeId: category.id});
+                                                        setIsTypeDropdownOpen(false);
+                                                    }}
+                                                >
+                                                    {category.name} ({category.size})
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div>
