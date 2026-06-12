@@ -394,13 +394,13 @@ export default function ParkingSpotsConfig() {
                                     </label>
                                     <select
                                         value={formData.typeId}
-                                        onChange={(e) =>
-                                            setFormData({...formData, typeId: e.target.value})
-                                        }
-                                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
+                                        onChange={(e) => setFormData({...formData, typeId: e.target.value})}
+                                        className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                                        style={{backgroundColor: 'white', color: 'black'}} // HARD FORCED STYLE
                                     >
                                         {categories.map((category) => (
-                                            <option key={category.id} value={category.id}>
+                                            <option key={category.id} value={category.id}
+                                                    style={{backgroundColor: 'white', color: 'black'}}>
                                                 {category.name} ({category.size})
                                             </option>
                                         ))}

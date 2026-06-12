@@ -9,6 +9,12 @@ select, option {
     color: #111827 !important;
 }
 
+:where(select, option) {
+    appearance: none !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+}
+
 @keyframes blob {
     0% {
         transform: translate(0px, 0px) scale(1);
