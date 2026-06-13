@@ -51,7 +51,7 @@ export default function AdminDashboard() {
         totalUsers: 0,
         activeSessions: 0,
         totalSpots: 0,
-        revenueToday: 0
+        totalRevenue: 0
     });
     const [revenueData, setRevenueData] = useState([]);
     const [peakHours, setPeakHours] = useState<PeakHourData[]>([]);
@@ -133,8 +133,7 @@ export default function AdminDashboard() {
                         />
                         <Stats
                             label="Revenue Today"
-                            // Use ?. and || 0 to prevent the undefined crash
-                            value={`$${(stats.revenueToday || 0).toFixed(2)}`}
+                            value={`$${(stats?.totalRevenue || 0).toFixed(2)}`}
                             icon={DollarSign}
                             change=""
                             color="purple"

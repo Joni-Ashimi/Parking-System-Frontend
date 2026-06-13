@@ -1,4 +1,3 @@
-// app/(user)/user/parking/success/page.tsx
 "use client";
 
 import {useEffect, useState} from "react";
@@ -9,7 +8,6 @@ import Link from "next/link";
 export default function ParkingSuccessPage() {
     const [show, setShow] = useState(false);
 
-    // Animate in on mount
     useEffect(() => {
         const t = setTimeout(() => setShow(true), 100);
         return () => clearTimeout(t);
@@ -25,7 +23,6 @@ export default function ParkingSuccessPage() {
                     {/* Main card */}
                     <div className="bg-white rounded-3xl shadow-xl border border-emerald-100 overflow-hidden">
 
-                        {/* Top stripe */}
                         <div className="bg-gradient-to-r from-emerald-500 to-teal-500 px-6 py-8 text-center">
                             <div
                                 className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
@@ -35,7 +32,6 @@ export default function ParkingSuccessPage() {
                             <p className="text-emerald-100 text-sm mt-1">Your parking session has ended</p>
                         </div>
 
-                        {/* Body */}
                         <div className="px-6 py-6 space-y-4">
                             <p className="text-sm text-gray-500 text-center">
                                 Thank you! Your payment has been processed and the spot has been released.
@@ -76,7 +72,7 @@ export default function ParkingSuccessPage() {
                                     Park Again <ArrowRight size={15}/>
                                 </Link>
                                 <Link
-                                    href="/dashboard"
+                                    href="/user/dashboard"
                                     className="w-full py-2.5 border border-gray-200 hover:bg-gray-50 text-gray-600 rounded-xl text-sm font-medium transition text-center"
                                 >
                                     Go to Dashboard
