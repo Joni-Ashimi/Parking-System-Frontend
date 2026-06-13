@@ -91,8 +91,8 @@ export default function LiveSessionsPage() {
                 <div className="flex items-center gap-3">
                     <img
                         src={
-                            record.user.profileImageUrl ||
-                            (record.user.gender === "MALE"
+                            record?.profileImageUrl ||
+                            (record?.gender === "MALE"
                                 ? "https://res.cloudinary.com/dorwowkmx/image/upload/v1778960498/male-face-avatar-icon-set-flat-design-social-media-profiles_1281173-3806_mcwkod.jpg"
                                 : "https://res.cloudinary.com/dorwowkmx/image/upload/v1778960555/avatar-profile-icon-flat-style-female-user-profile-vector-illustration-isolated-background-women-profile-sign-business-concept_157943-38866_li4tqs.jpg")
                         }
