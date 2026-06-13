@@ -147,7 +147,7 @@ export default function LoginPage() {
                             <Shield size={24} className="text-blue-200"/>
                             <div>
                                 <p className="font-semibold">Secure payments</p>
-                                <p className="text-sm text-blue-100">Pay with Visa, Mastercard, or PayPal</p>
+                                <p className="text-sm text-blue-100">Pay with POK instantly to the merchant</p>
                             </div>
                         </div>
                         <div

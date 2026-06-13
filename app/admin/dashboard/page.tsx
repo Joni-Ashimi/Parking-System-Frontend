@@ -24,8 +24,8 @@ import {handleRequestErrors} from "@/utils/functions";
 import DashboardService from "@/services/DashboardService";
 
 const spotTypeUsage = [
-    {name: "Small", value: 35, color: "#3B82F6"},
-    {name: "Medium", value: 45, color: "#10B981"},
+    {name: "Small", value: 35, color: "#10B981"},
+    {name: "Medium", value: 45, color: "#3B82F6"},
     {name: "Large", value: 20, color: "#F59E0B"},
 ];
 

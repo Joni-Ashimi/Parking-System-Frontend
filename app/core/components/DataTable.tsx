@@ -34,7 +34,8 @@ interface DataTableProps<T> {
         pageSize: number | undefined;
         qs: string;
         sortBy: string | undefined;
-        sortOrder: "ASC" | "DESC" | undefined
+        sortOrder: "ASC" | "DESC" | undefined;
+        filters?: Record<string, (string | number | boolean)[] | null>;
     }) => void;
     defaultPage?: number;
     defaultPageSize?: number;
@@ -80,10 +81,13 @@ const CustomTable = <T extends TableRecord>({
 
     const [sortBy, setSortBy] = useState<string | undefined>(undefined);
     const [sortOrder, setSortOrder] = useState<'ASC' | 'DESC' | undefined>(undefined);
+    const [filters, setFilters] = useState<Record<string, (string | number | boolean)[] | null>>({});
 
     const onChange: TableProps<T>['onChange'] = (pagination, filters, sorter, extra) => {
         setPage(pagination.current || defaultPage);
         setPageSize(Number(pagination.pageSize) || defaultPageSize);
+        // @ts-ignore
+        setFilters(filters || {});
         if (sorter && !Array.isArray(sorter) && sorter.columnKey) {
             setSortBy(sorter.columnKey as string);
             setSortOrder(sorter.order === 'ascend' ? 'ASC' : sorter.order === 'descend' ? 'DESC' : undefined);
@@ -118,9 +122,9 @@ const CustomTable = <T extends TableRecord>({
 
     useEffect(() => {
         setIsLoading(true);
-        getData({page, pageSize, qs: searchTerm, sortBy, sortOrder});
+        getData({page, pageSize, qs: searchTerm, sortBy, sortOrder, filters});
         setIsLoading(false);
-    }, [page, pageSize, searchTerm, sortBy, sortOrder, ...extraDependencies]);
+    }, [page, pageSize, searchTerm, sortBy, sortOrder, filters, ...extraDependencies]);
 
     const handleRowClick = (record: T) => {
         setSelectedRowKeys([record.id]);

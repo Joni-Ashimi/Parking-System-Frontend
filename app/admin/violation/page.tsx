@@ -37,7 +37,7 @@ interface TableParams {
     qs?: string;
     sortBy?: string;
     sortOrder?: "ASC" | "DESC";
-    filters?: Record<string, (string | number | boolean)[]>;
+    filters?: Record<string, (string | number | boolean)[] | null>;
 }
 
 interface GlobalStats {
@@ -49,7 +49,6 @@ interface GlobalStats {
     fraud: number;
 }
 
-// ─── Description Modal ────────────────────────────────────────────────────────
 function DescriptionModal({violation, onClose}: { violation: Violation; onClose: () => void }) {
     const typeMeta = getTypeMeta(violation.type);
 
@@ -159,7 +158,7 @@ function TypeBadge({type}: { type: ViolationType }) {
 }
 
 function StatusBadge({status}: { status: ViolationStatus }) {
-    if (status === "RESOLVED") {
+    if (status?.toUpperCase() === "RESOLVED") {
         return (
             <span
                 className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 whitespace-nowrap">
@@ -265,7 +264,7 @@ export default function ViolationsPage() {
             title: "User",
             dataIndex: "user",
             key: "user",
-            width: "30%", // Gives full structural context breath space
+            width: "30%",
             render: (_, record) => (
                 <div className="flex items-center gap-3 max-w-xs min-w-0">
                     {record.user ? (
@@ -299,12 +298,13 @@ export default function ViolationsPage() {
                     )}
                 </div>
             ),
+            sorter: true,
         },
         {
             title: "Type",
             dataIndex: "type",
             key: "type",
-            width: 140, // Keeps the category column separate from user info columns
+            width: 140,
             filters: [
                 {text: "Overstay", value: "overstay"},
                 {text: "Fraud", value: "fraud"},
@@ -375,6 +375,8 @@ export default function ViolationsPage() {
         },
     ];
 
+    // @ts-ignore
+    // @ts-ignore
     return (
         <AdminSidebar>
             <div className="min-h-screen bg-slate-50">
