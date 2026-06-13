@@ -59,9 +59,8 @@ export default function VehiclesPage() {
         setCardError((prev) => ({...prev, [id]: ""}));
         try {
             await VehicleService.markAsDefault(id);
-            setVehicles((prev) =>
-                prev.map((v) => ({...v, isDefault: v.id === id}))
-            );
+            const res = await VehicleService.getMyVehicles();
+            setVehicles(res.data);
         } catch (err: any) {
             const msg = err?.response?.data?.message ?? "Failed to set default.";
             setCardError((prev) => ({...prev, [id]: msg}));
@@ -98,14 +97,8 @@ export default function VehiclesPage() {
 
         setSubmitting(true);
         try {
-            const res = await VehicleService.create(newPlate.toUpperCase(), newType, user!.id);
-            const created: Vehicle = {
-                id: res.data.id,
-                plateNumber: res.data.plateNumber,
-                type: res.data.type as VehicleType,
-                isDefault: res.data.isDefault ?? vehicles.length === 0,
-            };
-            setVehicles((prev) => [...prev, created]);
+            await VehicleService.create(newPlate.toUpperCase(), newType, user!.id);
+            await fetchVehicles();
             setNewPlate("");
             setNewType("car");
             setShowAddModal(false);

@@ -64,6 +64,12 @@ const VEHICLE_ICONS: Record<string, any> = {
     bus: Truck,
 };
 
+const SPOT_SIZE_MAP: Record<string, VehicleSize> = {
+    small: "small",
+    standard: "medium",
+    large: "large",
+};
+
 export default function DynamicUserMapPage() {
     const [spots, setSpots] = useState<ParkingSpot[]>([]);
     const [selectedSpot, setSelectedSpot] = useState<ParkingSpot | null>(null);
@@ -113,14 +119,21 @@ export default function DynamicUserMapPage() {
 
     const handleSpotClick = (spot: ParkingSpot) => {
         if (spot.status !== "available") return;
-        if (compatibleSize && spot.type?.size?.toLowerCase() !== compatibleSize.toLowerCase()) return;
+        if (compatibleSize && spot.type?.size) {
+            const normalizedSpotSize = SPOT_SIZE_MAP[spot.type.size.toLowerCase()] ?? spot.type.size.toLowerCase();
+            if (normalizedSpotSize !== compatibleSize) return;
+        }
         setSelectedSpot(spot);
     };
+
     const getSpotState = (spot: ParkingSpot): "selected" | "compatible" | "incompatible" | "occupied" | "maintenance" => {
         if (selectedSpot?.id === spot.id) return "selected";
         if (spot.status === "occupied") return "occupied";
         if (spot.status === "maintenance" || spot.status === "reserved") return "maintenance";
-        if (compatibleSize && spot.type?.size?.toLowerCase() !== compatibleSize.toLowerCase()) return "incompatible";
+        if (compatibleSize && spot.type?.size) {
+            const normalizedSpotSize = SPOT_SIZE_MAP[spot.type.size.toLowerCase()] ?? spot.type.size.toLowerCase();
+            if (normalizedSpotSize !== compatibleSize) return "incompatible";
+        }
         return "compatible";
     };
 
