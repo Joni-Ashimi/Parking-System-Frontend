@@ -9,21 +9,6 @@ const ParkingLotService = {
 
     findAll: () =>
         API.get('/parking-lots'),
-
-    findOne: (id: string) =>
-        API.get(`/parking-lots/${id}`),
-
-    update: (id: string, data: any) =>
-        API.patch(`/parking-lots/${id}`, data),
-
-    remove: (id: string) =>
-        API.delete(`/parking-lots/${id}`),
-
-    assignSpot: (lotId: string, spotId: string) =>
-        API.post(`/parking-lots/${lotId}/spots/${spotId}`),
-
-    getStats: (lotId: string) =>
-        API.get(`/parking-lots/${lotId}/stats`),
 };
 
 export default ParkingLotService;

@@ -1,11 +1,10 @@
 "use client";
 
 import {useState} from "react";
-import {Camera, CreditCard, Save, Shield, Star, X,} from "lucide-react";
+import {CreditCard, Save, Shield, Star, X,} from "lucide-react";
 import UserSideBar from "@/components/sidebar/userSidebar";
 import CImageInput from "@/components/core/inputs/CImageInput";
 
-// Mock user data
 const initialUser = {
     name: "Alex Johnson",
     email: "alex@example.com",
@@ -45,20 +44,19 @@ export default function ProfilePage() {
             <UserSideBar>
                 <div className="min-h-screen bg-gradient-to-br from-gray-50 to-slate-100">
                     <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-                        {/* Page Header */}
                         <div className="mb-8">
                             <h1 className="text-3xl font-bold text-gray-800">My Profile</h1>
                             <p className="text-gray-500 mt-1">Manage your personal information and preferences.</p>
                         </div>
 
                         <div className="space-y-6">
-                            {/* Avatar & Name Card */}
                             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
                                 <div className="flex flex-col sm:flex-row items-center gap-6">
                                     <div className="relative w-24 h-24">
-                                        <div className="w-24 h-24 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full flex items-center justify-center text-white text-3xl font-bold shadow-lg overflow-hidden">
+                                        <div
+                                            className="w-24 h-24 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full flex items-center justify-center text-white text-3xl font-bold shadow-lg overflow-hidden">
                                             {avatar ? (
-                                                <img src={avatar} className="w-full h-full object-cover" />
+                                                <img src={avatar} className="w-full h-full object-cover"/>
                                             ) : (
                                                 user.avatar
                                             )}
@@ -140,7 +138,6 @@ export default function ProfilePage() {
                             </div>
 
                             <div className="grid gap-6 sm:grid-cols-2">
-                                {/* Default Vehicle */}
                                 <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
                                     <div className="flex items-center gap-3 mb-3">
                                         <Star size={20} className="text-blue-600"/>
@@ -152,7 +149,6 @@ export default function ProfilePage() {
                                     </button>
                                 </div>
 
-                                {/* Payment Method */}
                                 <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
                                     <div className="flex items-center gap-3 mb-3">
                                         <CreditCard size={20} className="text-blue-600"/>

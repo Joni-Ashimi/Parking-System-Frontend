@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import {Loader2} from "lucide-react";
 import CardsService from "@/services/CardsService";
 import {AddCardData, PaymentErrorResponse} from "@nebula-ltd/pok-payments-js";
+import {handleRequestErrors} from "@/utils/functions";
 
 const AddCardForm = dynamic(
     () => import("@nebula-ltd/pok-payments-js/react").then((mod) => mod.AddCardForm),
@@ -22,13 +23,10 @@ export default function AddCardModal({onClose, onComplete}: AddCardModalProps) {
 
     const handleSuccess = async (cardPayload: AddCardData) => {
         try {
-            // Respecting your service layer pattern
             await CardsService.saveCard(cardPayload);
             onComplete();
         } catch (error) {
-            console.error("Failed to save card via CardsService:", error);
-            // Optional: Handle error via your existing function
-            // handleRequestErrors(error);
+            handleRequestErrors(error);
         }
     };
 

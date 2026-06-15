@@ -37,7 +37,6 @@ export default function AdminSpotActionModal({
 
     const [validationError, setValidationError] = useState<string | null>(null);
 
-    // Sync individual states directly to avoid stale object references
     useEffect(() => {
         if (isOpen) {
             setValidationError(null);
@@ -60,7 +59,7 @@ export default function AdminSpotActionModal({
     if (!isOpen) return null;
 
     const handleFormSubmit = async (e: React.FormEvent) => {
-        e.preventDefault(); // Prevent native form reloads
+        e.preventDefault();
         setValidationError(null);
 
         const cleanSpot = spotNumber.trim().toUpperCase();
@@ -78,7 +77,6 @@ export default function AdminSpotActionModal({
             return;
         }
 
-        // Apply our 10-column validation threshold rule
         const isChangingRow = !editingSpot || editingSpot.spotNumber.split("-")[0].toUpperCase() !== targetRow;
 
         if (isChangingRow) {
@@ -99,7 +97,6 @@ export default function AdminSpotActionModal({
         }
 
         try {
-            // Send fields explicitly ensuring values are populated
             await onSave({
                 spotNumber: cleanSpot,
                 floor: Number(floor),

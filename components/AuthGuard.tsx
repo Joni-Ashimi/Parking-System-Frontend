@@ -20,7 +20,6 @@ export default function AuthGuard({children}: { children: React.ReactNode }) {
             const isUserRoute = pathname.startsWith("/user");
             const isGuestRoute = pathname.startsWith("/login") || pathname.startsWith("/register");
 
-            // 1. Not logged in -> kick out of private pages
             if (!accessToken || !user) {
                 if (!isGuestRoute) {
                     setIsAuthorized(false);
@@ -34,16 +33,12 @@ export default function AuthGuard({children}: { children: React.ReactNode }) {
             const userRole = user.type?.toString().toLowerCase();
             const isAdmin = userRole === "admin";
 
-            // 2. Logic: Enforce strict separation
-
-            // If logged in as non-admin, block access to admin routes
             if (isAdminRoute && !isAdmin) {
                 setIsAuthorized(false);
                 router.replace("/user/dashboard");
                 return;
             }
 
-            // If logged in as admin, block access to user routes
             if (isUserRoute && isAdmin) {
                 setIsAuthorized(false);
                 router.replace("/admin/dashboard");

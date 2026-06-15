@@ -1,4 +1,3 @@
-// frontend/app/admin/violations/page.tsx
 "use client";
 
 import React, {useCallback, useEffect, useState} from "react";
@@ -197,7 +196,6 @@ function DescriptionCell({violation, onExpand}: { violation: Violation; onExpand
     );
 }
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
 export default function ViolationsPage() {
     const [violations, setViolations] = useState<Violation[]>([]);
     const [total, setTotal] = useState(0);
@@ -220,7 +218,6 @@ export default function ViolationsPage() {
         }
     }, []);
 
-    // Fixed: Properly extracts the newly layout-wrapped payload matching pagination object arrays
     const getData = useCallback(async (params: TableParams) => {
         const {page = 1, pageSize = 10, qs = "", sortBy, sortOrder, filters} = params;
         try {
@@ -375,7 +372,6 @@ export default function ViolationsPage() {
         },
     ];
 
-    // @ts-ignore
     // @ts-ignore
     return (
         <AdminSidebar>

@@ -27,7 +27,6 @@ export interface AdminUserViewModalProps {
 export default function AdminUserViewModal({isOpen, onClose, user}: AdminUserViewModalProps) {
     if (!isOpen || !user) return null;
 
-    // Badge styling helpers for User Roles and Statuses
     const getStatusBadge = (status: string) => {
         switch (status?.toLowerCase()) {
             case "verified":

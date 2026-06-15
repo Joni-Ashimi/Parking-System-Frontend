@@ -7,7 +7,6 @@ const VehicleService = {
     delete: (id: string) =>
         API.delete(`/vehicles/${id}`),
     markAsDefault: (id: string) => API.patch(`/vehicles/${id}/default`),
-    getById: (id: string) => API.get(`/vehicles/${id}`),
     getDefaultVehicle: async () => {
         const response = await API.get('/vehicles/default');
         return response?.data?.data ?? response?.data;

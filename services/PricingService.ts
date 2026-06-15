@@ -25,8 +25,6 @@ const PricingService = {
     createSpecialOffer: (data: CreateOfferPayload) =>
         API.post('/offers', data).then(res => res.data),
 
-    deleteCategory: (id: string) => API.delete(`/spot-categories/${id}`),
-
     deleteSpecialOffer: (id: string) => API.delete(`/offers/${id}`),
 };
 

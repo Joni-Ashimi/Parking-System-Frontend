@@ -69,7 +69,6 @@ export default function FeedbackPage() {
     };
 
     const resetForm = () => {
-        // Clean up remaining blob URLs from memory
         photos.forEach(photo => URL.revokeObjectURL(photo.url));
 
         setSubmitted(false);

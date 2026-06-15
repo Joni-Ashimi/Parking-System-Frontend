@@ -81,7 +81,6 @@ export default function AdminActionModal({
         <div
             className="fixed inset-0 z-50 flex items-start justify-center bg-black/30 backdrop-blur-[4px] p-5 pt-16 animate-in fade-in slide-in-from-top-4 duration-200">
             <div className="w-full max-w-md bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden">
-                {/* Animated progress bar shown while loading */}
                 <div className="h-1 w-full bg-gray-100 overflow-hidden">
                     {isLoading && (
                         <div
@@ -114,7 +113,6 @@ export default function AdminActionModal({
 
                     {children}
 
-                    {/* Loading status text */}
                     {isLoading && (
                         <div className="flex items-center gap-2 mt-4 mb-2 text-sm text-gray-500">
                             <Loader2 size={14} className="animate-spin flex-shrink-0"/>

@@ -28,7 +28,6 @@ export default function CardSelectionSection({
                                                  setShowCardSelection
                                              }: CardSelectionSectionProps) {
 
-    // Only hide if the UI is explicitly disabled
     if (!showCardSelection) {
         return null;
     }

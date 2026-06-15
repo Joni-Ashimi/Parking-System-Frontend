@@ -1,4 +1,3 @@
-// app/admin/feedbacks/page.tsx
 "use client";
 
 import React, {useCallback, useState} from "react";
@@ -50,12 +49,9 @@ export default function AdminFeedbacksPage() {
         }
     }, []);
 
-    // New action to update status to "responded" directly in state
     const handleMarkAsResponded = async (id: string) => {
         try {
             await FeedBackService.updateStatus(id, "responded");
-
-            // Instantly mutate target row status local state configuration without dropping records
             setFeedbacks((prev) =>
                 prev.map((item) => (item.id === id ? {...item, status: "responded"} : item))
             );

@@ -104,8 +104,6 @@ export default function ParkingSpotsConfig() {
 
     useEffect(() => {
         fetchData();
-        console.log("fetchData called");
-        console.log('categories: ', categories);
     }, [fetchData]);
 
     const spotsList = Array.isArray(spots) ? spots : (spots as any).data || [];
@@ -212,7 +210,7 @@ export default function ParkingSpotsConfig() {
         return (
             <AdminSidebar>
                 <div className="min-h-screen flex items-center justify-center bg-gray-50">
-                    <p className="text-gray-500 font-medium animate-pulse">Loading spot topology stats...</p>
+                    <p className="text-gray-500 font-medium animate-pulse">Loading spot stats...</p>
                 </div>
             </AdminSidebar>
         );

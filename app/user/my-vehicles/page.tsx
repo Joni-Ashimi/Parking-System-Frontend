@@ -24,14 +24,12 @@ export default function VehiclesPage() {
     const [loading, setLoading] = useState(true);
     const [fetchError, setFetchError] = useState("");
 
-    // Modal state
     const [showAddModal, setShowAddModal] = useState(false);
     const [newPlate, setNewPlate] = useState("");
     const [newType, setNewType] = useState<VehicleType>("car");
     const [submitting, setSubmitting] = useState(false);
     const [formError, setFormError] = useState("");
 
-    // Per-card action state
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const [settingDefaultId, setSettingDefaultId] = useState<string | null>(null);
     const [cardError, setCardError] = useState<Record<string, string>>({});

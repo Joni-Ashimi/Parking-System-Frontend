@@ -9,7 +9,6 @@ const UserService = {
         sortOrder?: "ASC" | "DESC"
     }) => API.get('/users', {params}),
     getUsersStats: () => API.get('/users/stats'),
-    getById: (id: string) => API.get(`/users/${id}`),
     getMe: () => API.get('/users/me'),
     deleteUser: (id: string) => API.delete(`/users/${id}`),
     partialUpdateMe: (data: { name?: string; email?: string }) => API.patch('/users/me', data),

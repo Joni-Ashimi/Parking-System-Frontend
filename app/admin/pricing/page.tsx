@@ -24,8 +24,8 @@ interface PricingTier {
     dailyRate: number;
     size: string;
     spots: number;
-    effectiveHourlyRate: number; // Added from backend runtime
-    isDiscounted: boolean;       // Added from backend runtime
+    effectiveHourlyRate: number;
+    isDiscounted: boolean;
     activeRuleName: string | null;
 }
 
@@ -203,7 +203,6 @@ export default function PricingPage() {
                             const IconComponent = VEHICLE_ICON_MAP[price.vehicleType] || Car;
                             const isCar = price.vehicleType === "car";
 
-                            // Check if an adjustment rule is influencing the price right now
                             const hasActiveRule = !!price.activeRuleName;
 
                             return (

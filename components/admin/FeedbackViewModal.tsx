@@ -146,7 +146,7 @@ export default function FeedbackViewModal({isOpen, onClose, feedback}: FeedbackV
                                         <button
                                             key={index}
                                             type="button"
-                                            onClick={() => setSelectedPhoto(url)} // ◄ Intercept and save to state
+                                            onClick={() => setSelectedPhoto(url)}
                                             className="group relative h-28 rounded-xl overflow-hidden border border-gray-200 bg-gray-50 hover:border-indigo-400 transition-all text-left"
                                         >
                                             <img
@@ -185,7 +185,7 @@ export default function FeedbackViewModal({isOpen, onClose, feedback}: FeedbackV
 
             {selectedPhoto && (
                 <div
-                    onClick={() => setSelectedPhoto(null)} // Click layout background context to close
+                    onClick={() => setSelectedPhoto(null)}
                     className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/80 backdrop-blur-md p-4 cursor-zoom-out animate-fade-in"
                 >
                     <button
@@ -196,7 +196,7 @@ export default function FeedbackViewModal({isOpen, onClose, feedback}: FeedbackV
                     </button>
 
                     <div
-                        onClick={(e) => e.stopPropagation()} // Prevent closing backdrop event bubble triggers
+                        onClick={(e) => e.stopPropagation()}
                         className="relative max-w-4xl max-h-[90vh] flex items-center justify-center animate-scale-up"
                     >
                         <img

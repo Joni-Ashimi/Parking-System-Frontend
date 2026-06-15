@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { FaFacebook, FaGavel, FaInstagram, FaTwitter } from 'react-icons/fa';
+import {FaFacebook, FaGavel, FaInstagram, FaTwitter} from 'react-icons/fa';
 import GradientButton from "@/components/core/buttons/GradientButton";
 
 export default function Footer() {
@@ -7,11 +7,11 @@ export default function Footer() {
         <footer className="bg-gray-900 text-white pt-8 md:pt-10 pb-6 w-full overflow-hidden">
             <div className="w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-                    {/* Brand & Social */}
                     <div className="sm:col-span-2 lg:col-span-1">
                         <Link href="/" className="flex items-center space-x-2 mb-4">
-                            <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-blue-500 rounded-lg flex items-center justify-center">
-                                <FaGavel className="text-white text-lg" />
+                            <div
+                                className="w-10 h-10 bg-gradient-to-r from-purple-600 to-blue-500 rounded-lg flex items-center justify-center">
+                                <FaGavel className="text-white text-lg"/>
                             </div>
                             <span className="text-xl font-bold">Auction</span>
                         </Link>
@@ -20,18 +20,17 @@ export default function Footer() {
                         </p>
                         <div className="flex space-x-4">
                             <a href="#" className="text-gray-400 hover:text-white" aria-label="Facebook">
-                                <FaFacebook className="text-lg md:text-xl" />
+                                <FaFacebook className="text-lg md:text-xl"/>
                             </a>
                             <a href="#" className="text-gray-400 hover:text-white" aria-label="Twitter">
-                                <FaTwitter className="text-lg md:text-xl" />
+                                <FaTwitter className="text-lg md:text-xl"/>
                             </a>
                             <a href="#" className="text-gray-400 hover:text-white" aria-label="Instagram">
-                                <FaInstagram className="text-lg md:text-xl" />
+                                <FaInstagram className="text-lg md:text-xl"/>
                             </a>
                         </div>
                     </div>
 
-                    {/* Quick Links */}
                     <div>
                         <h3 className="text-base md:text-lg font-semibold mb-3 md:mb-4">Quick Links</h3>
                         <ul className="space-y-2">
@@ -55,7 +54,6 @@ export default function Footer() {
                         </ul>
                     </div>
 
-                    {/* Support */}
                     <div>
                         <h3 className="text-base md:text-lg font-semibold mb-3 md:mb-4">Support</h3>
                         <ul className="space-y-2">
@@ -102,8 +100,8 @@ export default function Footer() {
                     </div>
                 </div>
 
-                {/* Copyright */}
-                <div className="border-t border-gray-800 mt-6 md:mt-8 pt-4 md:pt-6 text-center text-gray-400 text-sm md:text-base">
+                <div
+                    className="border-t border-gray-800 mt-6 md:mt-8 pt-4 md:pt-6 text-center text-gray-400 text-sm md:text-base">
                     <p>© {new Date().getFullYear()} Auctio. All rights reserved.</p>
                 </div>
             </div>

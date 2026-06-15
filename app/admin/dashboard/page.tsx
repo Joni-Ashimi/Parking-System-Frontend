@@ -261,7 +261,6 @@ export default function AdminDashboard() {
                             {peakHours.length > 0 && (
                                 <p className="text-sm text-gray-500 mt-2 text-center">
                                     {(() => {
-                                        // Sort by occupancy (coerced to a number for safety)
                                         const busiest = [...peakHours].sort((a, b) =>
                                             Number(b.occupancy) - Number(a.occupancy)
                                         )[0];

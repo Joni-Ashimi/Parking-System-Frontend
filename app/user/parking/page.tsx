@@ -45,7 +45,6 @@ export default function UserSessionPage() {
             .finally(() => setLoading(false));
     }, []);
 
-    // Timer starts from createdAt (when the session record was saved)
     useEffect(() => {
         if (!session) return;
         const startMs = new Date(session.createdAt ?? session.entryTime).getTime();
@@ -75,9 +74,7 @@ export default function UserSessionPage() {
         setCheckingOut(true);
         setCheckoutError(null);
         try {
-            console.log("Starting checkout for session:", session.id);
             const transaction = await ParkingSessionService.endSession(session.id);
-            console.log("Transaction:", transaction);
             const {sdkOrderId} = transaction;
 
             const cards = await CardsService.listUserCards();

@@ -22,15 +22,6 @@ const SpotCategoryService = {
 
     findAll: () =>
         API.get('/spot-categories'),
-
-    findOne: (id: string) =>
-        API.get(`/spot-categories/${id}`),
-
-    update: (id: string, data: Partial<SpotCategoryPayload>) =>
-        API.patch(`/spot-categories/${id}`, data),
-
-    remove: (id: string) =>
-        API.delete(`/spot-categories/${id}`),
 };
 
 export default SpotCategoryService;
