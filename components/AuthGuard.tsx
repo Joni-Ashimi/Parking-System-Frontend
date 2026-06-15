@@ -18,7 +18,7 @@ export default function AuthGuard({children}: { children: React.ReactNode }) {
         const checkAuthorization = () => {
             const isAdminRoute = pathname.startsWith("/admin");
             const isUserRoute = pathname.startsWith("/user");
-            const isGuestRoute = pathname.startsWith("/login") || pathname.startsWith("/register");
+            const isGuestRoute = pathname === "/" || pathname.startsWith("/login") || pathname.startsWith("/register");
 
             if (!accessToken || !user) {
                 if (isGuestRoute) {
