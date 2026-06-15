@@ -10,29 +10,32 @@ import CPasswordInput from "@/components/core/inputs/CPasswordInput";
 import {handleRequestErrors, showSuccess} from '@/utils/functions';
 import {hideLoader, showLoader} from "@/store/loadingSlice";
 import {loginSucces} from "@/store/auth/authSlice";
-import {AppDispatch, RootState} from "@/store/store";
-import { useDispatch, useSelector } from 'react-redux';
+import {AppDispatch} from "@/store/store";
+import {useDispatch} from 'react-redux';
 import AuthService from "@/services/AuthService";
 
 export default function LoginPage() {
     const router = useRouter();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
     const dispatch = useDispatch<AppDispatch>();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setIsLoading(true);
         dispatch(showLoader("Logging in..."));
         try {
             const response = await AuthService.login(email, password);
-            const { user, accessToken, refreshToken } = response.data;
-            dispatch(loginSucces({ user, accessToken, refreshToken }));
+            const {user, accessToken, refreshToken} = response.data;
+            dispatch(loginSucces({user, accessToken, refreshToken}));
             showSuccess(`Welcome back, ${user.name}!`);
             router.push("/user/dashboard");
         } catch (err) {
             handleRequestErrors(err);
         } finally {
             dispatch(hideLoader());
+            setIsLoading(false);
         }
     };
 
@@ -74,26 +77,7 @@ export default function LoginPage() {
                                 onChange={(e) => setPassword(e.target.value)}
                             />
                         </div>
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center">
-                                <input
-                                    id="remember-me"
-                                    name="remember-me"
-                                    type="checkbox"
-                                    className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
-                                />
-                                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
-                                    Remember me
-                                </label>
-                            </div>
-
-                            <div className="text-sm">
-                                <a href="#" className="font-medium text-purple-600 hover:text-purple-500">
-                                    Forgot your password?
-                                </a>
-                            </div>
-                        </div>
-                        <GradientButton label="Sign in" type="submit" />
+                        <GradientButton label="Sign in" type="submit" isLoading={isLoading}/>
                         <div className="text-center">
               <span className="text-sm text-gray-600">
                 Don't have an account?{' '}

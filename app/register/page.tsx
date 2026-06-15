@@ -165,6 +165,7 @@ export default function RegisterPage() {
                         <GradientButton
                             label={isLoading ? "Creating account..." : "Sign up"}
                             type="submit"
+                            isLoading={isLoading}
                         />
 
                         <div className="text-center">
