@@ -153,7 +153,7 @@ export default function PricingPage() {
             <AdminSidebar>
                 <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 gap-3">
                     <Loader2 className="w-10 h-10 text-blue-600 animate-spin"/>
-                    <p className="text-sm font-medium text-gray-500">Syncing database matrix state...</p>
+                    <p className="text-sm font-medium text-gray-500">Loading...</p>
                 </div>
             </AdminSidebar>
         );

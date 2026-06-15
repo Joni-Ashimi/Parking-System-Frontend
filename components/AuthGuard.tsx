@@ -21,12 +21,16 @@ export default function AuthGuard({children}: { children: React.ReactNode }) {
             const isGuestRoute = pathname.startsWith("/login") || pathname.startsWith("/register");
 
             if (!accessToken || !user) {
-                if (!isGuestRoute) {
-                    setIsAuthorized(false);
-                    router.replace("/login");
+                if (isGuestRoute) {
+                    setIsAuthorized(true);
                     return;
                 }
-                setIsAuthorized(true);
+                router.replace("/login");
+                return;
+            }
+
+            if (isGuestRoute) {
+                router.replace(user.type === "admin" ? "/admin/dashboard" : "/user/dashboard");
                 return;
             }
 

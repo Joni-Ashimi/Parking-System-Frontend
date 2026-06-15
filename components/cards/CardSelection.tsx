@@ -1,5 +1,4 @@
 'use client';
-
 import { FiCreditCard, FiX } from 'react-icons/fi';
 import { FaPlus } from 'react-icons/fa';
 
@@ -45,7 +44,6 @@ export default function CardSelectionSection({
                     </button>
                 </div>
 
-                {/* Empty State vs List State */}
                 {userCards.length === 0 ? (
                     <div className="text-center py-6 border-2 border-dashed border-gray-100 rounded-lg bg-gray-50">
                         <p className="text-sm text-gray-500 mb-4">No saved payment methods.</p>
@@ -85,7 +83,6 @@ export default function CardSelectionSection({
                     </div>
                 )}
 
-                {/* Always visible Add button */}
                 <button
                     onClick={() => setShowAddCardForm(true)}
                     className="w-full mt-4 p-3 border-2 border-dashed border-gray-300 rounded-lg hover:border-purple-400 hover:bg-purple-50 transition-colors flex items-center justify-center gap-2 text-purple-600 font-medium">
