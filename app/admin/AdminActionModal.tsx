@@ -35,6 +35,7 @@ export default function AdminActionModal({
     const [isLoading, setIsLoading] = useState(false);
 
     if (!isOpen) return null;
+    // style
 
     const variantStyles = {
         danger: {
