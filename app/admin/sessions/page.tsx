@@ -23,6 +23,7 @@ interface ParkingSession {
     gender: string;
     profileImageUrl: string;
     status: "active";
+    createdAt?: string;
 }
 
 interface TableParams {
@@ -118,8 +119,8 @@ export default function LiveSessionsPage() {
         },
         {
             title: "Started",
-            dataIndex: "startedAt",
-            key: "startedAt",
+            dataIndex: "createdAt",
+            key: "createdAt",
             sorter: true,
             render: (value) => formatDate(value),
         },

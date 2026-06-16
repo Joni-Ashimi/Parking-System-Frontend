@@ -45,13 +45,16 @@ export default function UserSidebar({children}: { children: React.ReactNode }) {
                     </div>
 
                     <nav className="space-y-1">
-                        <NavItem icon={<LayoutDashboard size={18}/>} label="Dashboard" href="/user/dashboard" isOpen={isOpen}/>
+                        <NavItem icon={<LayoutDashboard size={18}/>} label="Dashboard" href="/user/dashboard"
+                                 isOpen={isOpen}/>
                         <NavItem icon={<Car size={18}/>} label="My Garage" href="/user/my-vehicles" isOpen={isOpen}/>
                         <NavItem icon={<Map size={18}/>} label="Spots Map" href="/user/park" isOpen={isOpen}/>
-                        <NavItem icon={<ParkingSquare size={18}/>} label="Checkout Live Session" href="/user/parking" isOpen={isOpen}/>
+                        <NavItem icon={<ParkingSquare size={18}/>} label="Checkout Live Session" href="/user/parking"
+                                 isOpen={isOpen}/>
                         <NavItem icon={<History size={18}/>} label="My Sessions" href="/user/sessions" isOpen={isOpen}/>
+                        <NavItem icon={<MessageSquare size={18}/>} label="Feedback" href="/user/feedback"
+                                 isOpen={isOpen}/>
                         <NavItem icon={<User size={18}/>} label="Profile" href="/user/me" isOpen={isOpen}/>
-                        <NavItem icon={<MessageSquare size={18} />} label="Feedback" href="/user/feedback" isOpen={isOpen} />
                     </nav>
                 </div>
             </div>

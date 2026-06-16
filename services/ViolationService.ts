@@ -27,6 +27,7 @@ const ViolationService = {
     },
 
     getStats: () => API.get("/violations/stats"),
+    resolveViolation: (id: string) => API.patch(`/violations/${id}`),
 };
 
 export default ViolationService;
