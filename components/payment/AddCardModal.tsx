@@ -52,7 +52,7 @@ export default function AddCardModal({
                 env: 'staging',
             });
 
-            await CardsService.tokenizeGuestCard({
+            const response=  await CardsService.tokenizeGuestCard({
                 csFlexCard: {
                     jwe,
                     expirationMonth: expMonth,
@@ -69,7 +69,7 @@ export default function AddCardModal({
                     countryCode,
                 },
             } as any);
-
+            console.log('response: ', response);
             onComplete();
         } catch (err) {
             console.error('Add card error:', err);

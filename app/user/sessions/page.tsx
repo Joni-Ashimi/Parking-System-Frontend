@@ -134,11 +134,11 @@ export default function SessionHistoryPage() {
                 <div className="flex items-center gap-2">
                     <div
                         className="w-8 h-8 bg-blue-50 text-blue-700 rounded-lg flex items-center justify-center text-xs font-bold shrink-0">
-                        {record.spot.spotNumber.split("-")[1] ?? record.spot.spotNumber}
+                        {record?.spot?.spotNumber.split("-")[1] ?? record?.spot?.spotNumber}
                     </div>
                     <div>
-                        <p className="text-sm font-semibold text-gray-800">{record.spot.spotNumber}</p>
-                        <p className="text-xs text-gray-400">{record.spot.lot?.name ?? "—"}</p>
+                        <p className="text-sm font-semibold text-gray-800">{record?.spot?.spotNumber}</p>
+                        <p className="text-xs text-gray-400">{record?.spot?.lot?.name ?? "—"}</p>
                     </div>
                 </div>
             ),
@@ -182,9 +182,9 @@ export default function SessionHistoryPage() {
                 price != null ? (
                     <div>
                         <p className="text-sm font-bold text-gray-900">€{Number(price).toFixed(2)}</p>
-                        {record.spot.type && (
+                        {record?.spot?.type && (
                             <p className="text-xs text-gray-400">
-                                @€{Number(record.spot.type.effectiveHourlyRate ?? record.spot.type.baseHourlyRate).toFixed(2)}/hr
+                                @€{Number(record?.spot?.type.effectiveHourlyRate ?? record?.spot?.type.baseHourlyRate).toFixed(2)}/hr
                             </p>
                         )}
                     </div>
@@ -200,7 +200,7 @@ export default function SessionHistoryPage() {
             render: (status: string, record) => (
                 <div className="space-y-1">
                     <StatusBadge status={status}/>
-                    {record.spot.type?.isDiscounted && (
+                    {record?.spot?.type?.isDiscounted && (
                         <div className="flex items-center gap-1 text-[10px] text-emerald-600">
                             <Tag size={9}/> Discounted
                         </div>
