@@ -52,8 +52,7 @@ export default function FeedbackViewModal({isOpen, onClose, feedback}: FeedbackV
                                 <MessageSquare size={18}/>
                             </div>
                             <div>
-                                <h3 className="text-base font-semibold text-gray-900">Feedback Details</h3>
-                                <p className="text-xs text-gray-400 font-medium">ID: {feedback.id}</p>
+                                <h3 className="text-base font-semibold text-blue-900">Feedback Details</h3>
                             </div>
                         </div>
                         <button onClick={onClose}

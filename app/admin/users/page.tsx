@@ -24,50 +24,42 @@ interface GlobalStats {
     banned: number;
 }
 
-function ActionMenu({
-                        user,
-                        onInitiateAction,
-                        onViewProfile,
-                    }: {
-    user: User;
-    onInitiateAction: (user: User, actionType: "verified" | "banned" | "delete") => void;
-    onViewProfile: (user: User) => void;
-}) {
+function ActionMenu({user, onInitiateAction, onViewProfile} : any) {
     return (
-        <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-end gap-1.5 md:gap-2" onClick={(e) => e.stopPropagation()}>
             <button
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-indigo-200 text-indigo-600 hover:bg-indigo-50 hover:border-indigo-400 transition-all"
+                className="inline-flex items-center gap-1.5 px-2 md:px-3 py-1.5 text-xs font-medium rounded-lg border border-indigo-200 text-indigo-600 hover:bg-indigo-50 transition-all"
                 onClick={() => onViewProfile(user)}
             >
                 <Eye size={13}/>
-                View
+                <span className="hidden sm:inline">View</span>
             </button>
 
             {user.verificationStatus === "verified" ? (
                 <button
                     onClick={() => onInitiateAction(user, "banned")}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-rose-200 text-rose-500 hover:bg-rose-50 hover:border-rose-400 transition-all"
+                    className="inline-flex items-center gap-1.5 px-2 md:px-3 py-1.5 text-xs font-medium rounded-lg border border-rose-200 text-rose-500 hover:bg-rose-50 transition-all"
                 >
                     <UserX size={13}/>
-                    Ban
+                    <span className="hidden sm:inline">Ban</span>
                 </button>
             ) : (
                 <button
                     onClick={() => onInitiateAction(user, "verified")}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-emerald-200 text-emerald-600 hover:bg-emerald-50 hover:border-emerald-400 transition-all"
+                    className="inline-flex items-center gap-1.5 px-2 md:px-3 py-1.5 text-xs font-medium rounded-lg border border-emerald-200 text-emerald-600 hover:bg-emerald-50 transition-all"
                 >
                     <UserCheck size={13}/>
-                    Activate
+                    <span className="hidden sm:inline">Activate</span>
                 </button>
             )}
+
             <button
                 type="button"
                 onClick={() => onInitiateAction(user, "delete")}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-all"
-                title="Soft Delete User"
+                className="inline-flex items-center gap-1.5 px-2 md:px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-100 transition-all"
             >
                 <Trash2 size={13}/>
-                Delete
+                <span className="hidden sm:inline">Delete</span>
             </button>
         </div>
     );
@@ -194,6 +186,7 @@ export default function AdminUsersPage() {
             dataIndex: "phoneNumber",
             key: "phoneNumber",
             sorter: true,
+            className: "hidden md:table-cell",
         },
         {
             title: "Last Login",
@@ -201,6 +194,7 @@ export default function AdminUsersPage() {
             key: "lastLoginAt",
             sorter: true,
             render: (value: string) => formatDate(value),
+            className: "hidden sm:table-cell",
         },
         {
             title: "Status",
@@ -258,14 +252,14 @@ export default function AdminUsersPage() {
     return (
         <AdminSidebar>
             <div className="min-h-screen bg-slate-50">
-                <header className="bg-white border-b border-gray-200 px-8 py-4">
-                    <div className="flex justify-between items-center">
+                <header className="bg-white border-b border-gray-200 px-4 md:px-8 py-4">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
                         <div>
-                            <h1 className="text-2xl font-semibold text-gray-900">User Management</h1>
+                            <h1 className="text-xl md:text-2xl font-semibold text-gray-900">User Management</h1>
                             <p className="text-sm text-gray-400 mt-0.5">Monitor and control user access</p>
                         </div>
                         <div
-                            className="flex items-center gap-2 px-3 py-1.5 bg-indigo-50 border border-indigo-100 rounded-lg">
+                            className="flex items-center gap-2 px-3 py-1.5 bg-indigo-50 border border-indigo-100 rounded-lg w-fit">
                             <Shield size={14} className="text-indigo-500"/>
                             <span className="text-sm text-indigo-600 font-medium">Admin Access</span>
                         </div>
@@ -286,7 +280,7 @@ export default function AdminUsersPage() {
                                 system.</p>
                         </div>
                     </div>
-                    <div className="grid grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                         <div
                             className="bg-white rounded-2xl border border-gray-200 p-5 flex items-center gap-4 shadow-sm">
                             <div

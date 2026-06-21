@@ -5,10 +5,14 @@ import {usePathname, useRouter} from "next/navigation";
 import {useDispatch, useSelector} from "react-redux";
 import {RootState} from "@/store/store";
 import {logOut} from "@/store/auth/authSlice";
-import {LogIn, LogOut, ParkingSquare, User, UserPlus} from "lucide-react";
+import {LogIn, LogOut, Menu, ParkingSquare, User, UserPlus} from "lucide-react";
 import Link from "next/link";
 
-export default function Header() {
+interface HeaderProps {
+    onMenuClick?: () => void;
+}
+
+export default function Header({onMenuClick}: HeaderProps) {
     const pathname = usePathname();
     const router = useRouter();
     const dispatch = useDispatch();
@@ -24,34 +28,42 @@ export default function Header() {
 
     return (
         <header
-            className={`w-full bg-white border-b border-gray-200 px-8 flex items-center sticky top-0 z-50 shadow-sm ${
-                isHome ? "justify-between" : "justify-end"
+            className={`w-full bg-white border-b border-gray-200 px-4 md:px-8 flex items-center sticky top-0 z-40 shadow-sm ${
+                isHome ? "justify-between" : "justify-between lg:justify-end"
             }`}
             style={{
                 height: isAdmin ? "80px" : "64px",
                 minHeight: isAdmin ? "80px" : "64px"
             }}
         >
+            {/* Mobile hamburger — shown only inside sidebar layouts on mobile */}
+            {onMenuClick && (
+                <button
+                    onClick={onMenuClick}
+                    className="p-2 rounded-lg hover:bg-gray-100 transition lg:hidden"
+                    aria-label="Open menu"
+                >
+                    <Menu size={20} className="text-gray-600"/>
+                </button>
+            )}
+
             {isHome && (
                 <Link href="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
                     <ParkingSquare className="w-6 h-6 text-blue-600 flex-shrink-0"/>
-                    <span className="font-semibold text-gray-800 tracking-tight">
-                        Prometrix
-                    </span>
+                    <span className="font-semibold text-gray-800 tracking-tight">Prometrix</span>
                 </Link>
             )}
-            <div className="flex items-center gap-4">
+
+            <div className="flex items-center gap-3">
                 {user ? (
                     <>
-                        <div
-                            className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
-                            <div
-                                className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold uppercase">
+                        <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
+                            <div className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold uppercase">
                                 {user.name?.charAt(0) || <User size={12}/>}
                             </div>
-                            <span className="text-sm font-medium text-slate-700 max-w-[120px] truncate">
-                        {user.name}
-                    </span>
+                            <span className="text-sm font-medium text-slate-700 max-w-[120px] truncate hidden sm:block">
+                                {user.name}
+                            </span>
                         </div>
 
                         <button

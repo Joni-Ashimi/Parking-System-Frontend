@@ -258,6 +258,7 @@ export default function ProfilePage() {
         try {
             await UserService.confirmPassword({code: verificationCode.trim(), newPassword: passwordData.new});
             showSuccess("Password updated! Please log in again.");
+            resetPasswordForm();
             setTimeout(() => {
                 dispatch(logOut());
                 router.push("/login");
@@ -266,7 +267,6 @@ export default function ProfilePage() {
             setPasswordError(err?.response?.data?.message ?? "Invalid or expired code.");
         } finally {
             setSavingPassword(false);
-            resetPasswordForm();
         }
     };
 

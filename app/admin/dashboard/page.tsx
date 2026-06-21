@@ -51,6 +51,8 @@ export default function AdminDashboard() {
         totalUsers: 0,
         activeSessions: 0,
         totalSpots: 0,
+        availableSpots: 0,
+        occupiedSpots: 0,
         totalRevenue: 0
     });
     const [revenueData, setRevenueData] = useState([]);
@@ -125,8 +127,8 @@ export default function AdminDashboard() {
                             color="blue"
                         />
                         <Stats
-                            label="Active Spots"
-                            value={`${stats.activeSessions || 0}/${stats.totalSpots || 0}`}
+                            label="Available Spots"
+                            value={`${stats.availableSpots || 0}/${stats.totalSpots || 0}`}
                             icon={ParkingSquare}
                             change=""
                             color="green"

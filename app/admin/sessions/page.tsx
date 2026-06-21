@@ -11,18 +11,23 @@ import {formatDate, handleRequestErrors} from "@/utils/functions";
 
 interface ParkingSession {
     id: string;
-    userName: string;
-    vehiclePlate: string;
-    spotNumber: string;
-    startTime: string;
-    currentCost: number;
-    vehicle: any;
-    user: any;
-    email: any;
-    name: any;
-    gender: string;
-    profileImageUrl: string;
+    entryTime: string;
     status: "active";
+    price?: number;
+    currentCost: number;
+    user: {
+        id: string;
+        name: string;
+        email: string;
+        gender: "MALE" | "FEMALE";
+        profileImageUrl: string | null;
+    };
+    vehicle: {
+        plateNumber: string;
+    };
+    spot: {
+        spotNumber: string;
+    };
     createdAt?: string;
 }
 
@@ -92,8 +97,8 @@ export default function LiveSessionsPage() {
                 <div className="flex items-center gap-3">
                     <img
                         src={
-                            record?.profileImageUrl ||
-                            (record?.gender === "MALE"
+                            record.user?.profileImageUrl ||
+                            (record?.user?.gender === "MALE"
                                 ? "https://res.cloudinary.com/dorwowkmx/image/upload/v1778960498/male-face-avatar-icon-set-flat-design-social-media-profiles_1281173-3806_mcwkod.jpg"
                                 : "https://res.cloudinary.com/dorwowkmx/image/upload/v1778960555/avatar-profile-icon-flat-style-female-user-profile-vector-illustration-isolated-background-women-profile-sign-business-concept_157943-38866_li4tqs.jpg")
                         }
@@ -119,8 +124,8 @@ export default function LiveSessionsPage() {
         },
         {
             title: "Started",
-            dataIndex: "createdAt",
-            key: "createdAt",
+            dataIndex: "entryTime",
+            key: "entryTime",
             sorter: true,
             render: (value) => formatDate(value),
         },
